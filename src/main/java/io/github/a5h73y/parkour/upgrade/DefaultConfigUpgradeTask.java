@@ -32,13 +32,16 @@ public class DefaultConfigUpgradeTask extends TimedConfigUpgradeTask {
 			transferAndDelete("Other.Parkour.CommandPermissions", "Other.Parkour.CommandUsePermissions");
 			transferAndDelete("MySQL.User", "MySQL.Username");
 			transferAndDelete("Lobby.EnforceWorld", "LobbySettings.EnforceWorld");
+			transferAndDelete("ParkourModes.Challenge.HidePlayers", "ParkourChallenge.HidePlayers");
+			transferAndDelete("ParkourModes.Challenge.CountdownFrom", "ParkourChallenge.CountdownFrom");
 
 			transferAndDelete("Scoreboard.Display.CurrentTime", "Scoreboard.LiveTimer.Enabled");
 			// TODO more scoreboard
 
 			// update int to actual value
 			getConfig().set("OnJoin.SetGameMode", getMatchingGameMode(getConfig().getInt("OnJoin.SetGamemode")));
-			getConfig().set("OnFinish.BroadcastLevel", getBroadcastLevel(getConfig().getInt("OnFinish.BroadcastLevel")));
+			getConfig().set("OnFinish.BroadcastLevel", getBroadcastLevel(
+					getConfig().getInt("OnFinish.BroadcastLevel")));
 			getConfig().set("OnFinish.SetGameMode", getMatchingGameMode(getConfig().getInt("OnFinish.SetGamemode")));
 			getConfig().set("MySQL.URL", "jdbc:mysql://" + getConfig().getString("MySQL.Host") + ":"
 					+ getConfig().getString("MySQL.Port") + "/" + getConfig().getString("MySQL.Database"));
@@ -60,6 +63,7 @@ public class DefaultConfigUpgradeTask extends TimedConfigUpgradeTask {
 			getConfig().set("Other.Economy", null);
 			getConfig().set("Lobby.Set", null);
 			getConfig().set("Lobby.EnforceWorld", null);
+			getConfig().set("ParkourModes.Challenge", null);
 			getParkourUpgrader().saveDefaultConfig();
 		} catch (IOException e) {
 			getParkourUpgrader().getLogger().severe("An error occurred during upgrade: " + e.getMessage());

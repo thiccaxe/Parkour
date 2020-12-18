@@ -1,11 +1,12 @@
 package io.github.a5h73y.parkour.type.checkpoint;
 
+import com.cryptomorin.xseries.XBlock;
 import io.github.a5h73y.parkour.Parkour;
 import io.github.a5h73y.parkour.configuration.ParkourConfiguration;
 import io.github.a5h73y.parkour.enums.ConfigType;
 import io.github.a5h73y.parkour.other.AbstractPluginReceiver;
 import io.github.a5h73y.parkour.other.Constants;
-import io.github.a5h73y.parkour.other.Validation;
+import io.github.a5h73y.parkour.other.ParkourValidation;
 import io.github.a5h73y.parkour.type.course.CourseInfo;
 import io.github.a5h73y.parkour.type.player.PlayerInfo;
 import io.github.a5h73y.parkour.utility.MaterialUtils;
@@ -14,7 +15,6 @@ import io.github.a5h73y.parkour.utility.StringUtils;
 import io.github.a5h73y.parkour.utility.TranslationUtils;
 import java.util.ArrayList;
 import java.util.List;
-import com.cryptomorin.xseries.XBlock;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -46,7 +46,7 @@ public class CheckpointManager extends AbstractPluginReceiver {
      * @param checkpoint optional checkpoint number to override
      */
     public void createCheckpoint(Player player, @Nullable Integer checkpoint) {
-        if (!Validation.createCheckpoint(player, checkpoint)) {
+        if (!ParkourValidation.canCreateCheckpoint(player, checkpoint)) {
             return;
         }
 
@@ -83,7 +83,7 @@ public class CheckpointManager extends AbstractPluginReceiver {
         createCheckpointData(selectedCourse, location, checkpoint);
         parkour.getCourseManager().clearCache(selectedCourse);
         player.sendMessage(TranslationUtils.getTranslation("Parkour.CheckpointCreated")
-                .replace("%CHECKPOINT%", String.valueOf(checkpoint))
+                .replace(Constants.CHECKPOINT_PLACEHOLDER, String.valueOf(checkpoint))
                 .replace(Constants.COURSE_PLACEHOLDER, selectedCourse));
     }
 
@@ -141,7 +141,7 @@ public class CheckpointManager extends AbstractPluginReceiver {
         ParkourConfiguration courseConfig = Parkour.getConfig(ConfigType.COURSES);
 
         int points = checkpointsConfig.getInt(courseName + ".Checkpoints") + 1;
-        World world = Bukkit.getWorld(courseConfig.getString(courseName + "." + "World"));
+        World world = Bukkit.getWorld(courseConfig.getString(courseName + ".World"));
 
         if (world == null) {
             return checkpoints;
@@ -194,7 +194,7 @@ public class CheckpointManager extends AbstractPluginReceiver {
         // if a checkpoint is specified, or default to 0 (start)
         String path = checkpoint == null ? courseName + ".0" : courseName + "." + checkpoint;
 
-        World world = Bukkit.getWorld(courseConfig.getString(courseName + "." + "World"));
+        World world = Bukkit.getWorld(courseConfig.getString(courseName + ".World"));
         double x = checkpointsConfig.getDouble(path + ".X");
         double y = checkpointsConfig.getDouble(path + ".Y");
         double z = checkpointsConfig.getDouble(path + ".Z");
@@ -208,7 +208,7 @@ public class CheckpointManager extends AbstractPluginReceiver {
 
         player.teleport(new Location(world, x, y, z, yaw, pitch));
         String message = TranslationUtils.getValueTranslation("Parkour.Teleport", courseName);
-        player.sendMessage(checkpoint != null ? message + StringUtils.colour(" &f(&3" + checkpoint + "&f)") : message);
+        TranslationUtils.sendMessage(player, checkpoint != null ? message + " &f(&3" + checkpoint + "&f)" : message, false);
     }
 
     /**
@@ -227,7 +227,7 @@ public class CheckpointManager extends AbstractPluginReceiver {
         int point = CourseInfo.getCheckpointAmount(courseName);
 
         if (point <= 0) {
-            sender.sendMessage(Parkour.getPrefix() + courseName + " has no checkpoints!");
+            TranslationUtils.sendMessage(sender, courseName + " has no Checkpoints!");
             return;
         }
 
@@ -239,7 +239,7 @@ public class CheckpointManager extends AbstractPluginReceiver {
         parkour.getCourseManager().clearCache(courseName);
 
         sender.sendMessage(TranslationUtils.getTranslation("Parkour.DeleteCheckpoint")
-                .replace("%CHECKPOINT%", String.valueOf(point))
+                .replace(Constants.CHECKPOINT_PLACEHOLDER, String.valueOf(point))
                 .replace(Constants.COURSE_PLACEHOLDER, courseName));
 
         PluginUtils.logToFile("Checkpoint " + point + " was deleted on " + courseName + " by " + sender.getName());
@@ -249,7 +249,7 @@ public class CheckpointManager extends AbstractPluginReceiver {
      * Delete the Course checkpoint data.
      * When the course is deleted, delete the checkpoint data for the course.
      *
-     * @param courseName course datat to delete
+     * @param courseName course checkpoint to delete
      */
     public void deleteCheckpointData(String courseName) {
         ParkourConfiguration checkpointConfig = Parkour.getConfig(ConfigType.CHECKPOINTS);

@@ -1,21 +1,21 @@
 package io.github.a5h73y.parkour.listener;
 
+import com.cryptomorin.xseries.XBlock;
 import io.github.a5h73y.parkour.Parkour;
 import io.github.a5h73y.parkour.enums.ParkourMode;
 import io.github.a5h73y.parkour.other.AbstractPluginReceiver;
 import io.github.a5h73y.parkour.type.kit.ParkourKit;
 import io.github.a5h73y.parkour.type.kit.ParkourKitAction;
 import io.github.a5h73y.parkour.type.player.ParkourSession;
+import io.github.a5h73y.parkour.utility.PlayerUtils;
 import java.util.Arrays;
 import java.util.List;
-import com.cryptomorin.xseries.XBlock;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
@@ -26,23 +26,6 @@ public class PlayerMoveListener extends AbstractPluginReceiver implements Listen
 
     public PlayerMoveListener(final Parkour parkour) {
         super(parkour);
-    }
-
-    @EventHandler
-    public void onPlayerMove_ParkourMode(PlayerMoveEvent event) {
-        if (!parkour.getPlayerManager().isPlaying(event.getPlayer())) {
-            return;
-        }
-
-        ParkourMode courseMode = parkour.getPlayerManager().getParkourSession(event.getPlayer()).getParkourMode();
-
-        if (courseMode == ParkourMode.NONE) {
-            return;
-        }
-
-        if (courseMode == ParkourMode.POTION) {
-            // check they still have the potion effect, if not reapply it
-        }
     }
 
     @EventHandler
@@ -110,19 +93,15 @@ public class PlayerMoveListener extends AbstractPluginReceiver implements Listen
 
                 case BOUNCE:
                     if (!player.hasPotionEffect(PotionEffectType.JUMP)) {
-                        player.addPotionEffect(
-                                new PotionEffect(PotionEffectType.JUMP,
-                                        kitAction.getDuration(),
-                                        (int) kitAction.getStrength()));
+                        PlayerUtils.applyPotionEffect(PotionEffectType.JUMP, kitAction.getDuration(),
+                                (int) kitAction.getStrength(), player);
                     }
                     break;
 
                 case SPEED:
                     if (!player.hasPotionEffect(PotionEffectType.SPEED)) {
-                        player.addPotionEffect(
-                                new PotionEffect(PotionEffectType.SPEED,
-                                        kitAction.getDuration(),
-                                        (int) kitAction.getStrength()));
+                        PlayerUtils.applyPotionEffect(PotionEffectType.SPEED, kitAction.getDuration(),
+                                (int) kitAction.getStrength(), player);
                     }
                     break;
 
@@ -131,11 +110,11 @@ public class PlayerMoveListener extends AbstractPluginReceiver implements Listen
                     break;
 
                 case NOPOTION:
-                    for (PotionEffect effect : player.getActivePotionEffects()) {
-                        player.removePotionEffect(effect.getType());
-                    }
-
+                    PlayerUtils.removeAllPotionEffects(player);
                     player.setFireTicks(0);
+                    break;
+
+                default:
                     break;
             }
         } else {
@@ -160,6 +139,8 @@ public class PlayerMoveListener extends AbstractPluginReceiver implements Listen
 
                             player.setVelocity(new Vector(x, 0.1, z));
                             break;
+
+                        default:
                     }
                 }
             }

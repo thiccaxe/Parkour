@@ -1,5 +1,6 @@
 package io.github.a5h73y.parkour.configuration.impl;
 
+import com.cryptomorin.xseries.XMaterial;
 import io.github.a5h73y.parkour.Parkour;
 import io.github.a5h73y.parkour.configuration.ParkourConfiguration;
 import io.github.a5h73y.parkour.enums.SoundType;
@@ -7,7 +8,6 @@ import io.github.a5h73y.parkour.utility.MaterialUtils;
 import io.github.a5h73y.parkour.utility.TranslationUtils;
 import java.util.Collections;
 import java.util.List;
-import com.cryptomorin.xseries.XMaterial;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
@@ -44,6 +44,7 @@ public class DefaultConfig extends ParkourConfiguration {
 		this.addDefault("OnJoin.SetGameMode", "SURVIVAL");
 		this.addDefault("OnJoin.TreatFirstCheckpointAsStart", false);
 		this.addDefault("OnJoin.PerCoursePermission", false);
+		this.addDefault("OnJoin.TeleportPlayer", true);
 
 		this.addDefault("OnCourse.AnybodyPlaceBreakBlocks", false);
 		this.addDefault("OnCourse.AdminPlaceBreakBlocks", true);
@@ -96,11 +97,15 @@ public class DefaultConfig extends ParkourConfiguration {
 		this.addDefault("OnLeaveServer.LeaveCourse", false);
 		this.addDefault("OnLeaveServer.TeleportToLastCheckpoint", false);
 
-		this.addDefault("ParkourModes.Challenge.HidePlayers", true);
-		this.addDefault("ParkourModes.Challenge.CountdownFrom", 5);
+		this.addDefault("ParkourChallenge.HidePlayers", true);
+		this.addDefault("ParkourChallenge.CountdownFrom", 5);
+		this.addDefault("ParkourChallenge.PrepareOnAccept", false);
+
 		this.addDefault("ParkourModes.Speedy.SetSpeed", 0.7);
 		this.addDefault("ParkourModes.Speedy.ResetSpeed", 0.2);
 		this.addDefault("ParkourModes.Dropper.FallDamage", false);
+		this.addDefault("ParkourModes.Rockets.Invert", false);
+		this.addDefault("ParkourModes.Rockets.Delay", 1);
 
 		this.addDefault("DisplayTitle.FadeIn", 5);
 		this.addDefault("DisplayTitle.Stay", 20);
@@ -181,13 +186,13 @@ public class DefaultConfig extends ParkourConfiguration {
 		this.addDefault("Other.Display.ShowMilliseconds", false);
 		this.addDefault("Other.Display.PrizeCooldown", true);
 		this.addDefault("Other.Display.OnlyReadyCourses", false);
-		this.addDefault("Other.Display.CourseCompleted", false);
 		this.addDefault("Other.OnServerShutdown.BackupFiles", false);
 		this.addDefault("Other.OnPlayerBan.ResetParkourInfo", false);
 
 		this.addDefault("Plugin.BountifulAPI.Enabled", true);
 		this.addDefault("Plugin.Vault.Enabled", true);
 		this.addDefault("Plugin.PlaceholderAPI.Enabled", true);
+		this.addDefault("Plugin.PlaceholderAPI.CacheTime", 15);
 		this.addDefault("Plugin.AAC.Enabled", true);
 
 		this.addDefault("Database.MaximumCoursesCached", 10);
@@ -214,7 +219,7 @@ public class DefaultConfig extends ParkourConfiguration {
 	public void addWhitelistedCommand(CommandSender sender, String command) {
 		List<String> whitelistedCommands = getWhitelistedCommands();
 		if (whitelistedCommands.contains(command.toLowerCase())) {
-			sender.sendMessage(Parkour.getPrefix() + "This command is already whitelisted!");
+			TranslationUtils.sendMessage(sender, "This command is already whitelisted!");
 			return;
 		}
 
@@ -222,8 +227,7 @@ public class DefaultConfig extends ParkourConfiguration {
 		set("OnCourse.EnforceParkourCommands.Whitelist", whitelistedCommands);
 		save();
 
-		sender.sendMessage(Parkour.getPrefix() + "Command " + ChatColor.AQUA + command
-				+ ChatColor.WHITE + " added to the whitelisted commands!");
+		TranslationUtils.sendMessage(sender, "Command &b" + command + "&f added to the whitelisted commands!");
 	}
 
 	public String getSignHeader() {
@@ -306,7 +310,7 @@ public class DefaultConfig extends ParkourConfiguration {
 		return this.getBoolean("Other.EnforceSafeCheckpoints");
 	}
 
-	public boolean isFirstCheckAsStart() {
+	public boolean isTreatFirstCheckpointAsStart() {
 		return this.getBoolean("OnJoin.TreatFirstCheckpointAsStart");
 	}
 

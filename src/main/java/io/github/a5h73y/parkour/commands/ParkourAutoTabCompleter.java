@@ -28,7 +28,7 @@ public class ParkourAutoTabCompleter extends AbstractPluginReceiver implements T
 
     private static final List<String> NO_PERMISSION_COMMANDS = Arrays.asList(
             "join", "info", "course", "lobby", "perms", "quiet", "list", "help", "material", "about",
-            "contact", "cmds", "version");
+            "contact", "cmds", "version", "challenge");
 
     private static final List<String> ADMIN_ONLY_COMMANDS = Arrays.asList(
             "setlobby", "reset", "economy", "recreate", "whitelist", "setlevel", "setplayer", "setrank", "settings",
@@ -37,7 +37,7 @@ public class ParkourAutoTabCompleter extends AbstractPluginReceiver implements T
     private static final List<String> ADMIN_COURSE_COMMANDS = Arrays.asList(
             "checkpoint", "ready", "setstart", "setcourse", "setautostart", "select", "deselect", "done", "link", "linkkit",
             "addjoinitem", "rewardonce", "rewardlevel", "rewardleveladd", "rewardrank", "rewarddelay", "rewardparkoins",
-            "setmode", "createkit", "editkit", "validatekit", "setplayerlimit");
+            "setmode", "createkit", "editkit", "validatekit", "setplayerlimit", "challengeonly");
 
     private static final List<String> ON_COURSE_COMMANDS = Arrays.asList(
             "back", "leave");
@@ -66,7 +66,10 @@ public class ParkourAutoTabCompleter extends AbstractPluginReceiver implements T
     private static final List<String> COMMANDS_MENU = Arrays.asList(
             "1", "2", "3", "4", "signs");
 
-    public ParkourAutoTabCompleter(Parkour parkour) {
+    private static final List<String> CHALLENGE_COMMANDS = Arrays.asList(
+            "create", "invite", "begin", "accept", "decline", "terminate", "info");
+
+    public ParkourAutoTabCompleter(final Parkour parkour) {
         super(parkour);
     }
 
@@ -78,7 +81,7 @@ public class ParkourAutoTabCompleter extends AbstractPluginReceiver implements T
     public List<String> onTabComplete(@NotNull CommandSender sender,
                                       @NotNull Command cmd,
                                       @NotNull String alias,
-                                      @NotNull String[] args) {
+                                      @NotNull String... args) {
         if (!(sender instanceof Player)) {
             return null;
         }
@@ -111,12 +114,12 @@ public class ParkourAutoTabCompleter extends AbstractPluginReceiver implements T
 
     /**
      * Populate the main command options.
-     * @param player requesting player
+     * @param player player
      * @return allowed commands
      */
     private List<String> populateMainCommands(Player player) {
         // if they have an outstanding question, make those the only options
-        if (parkour.getQuestionManager().hasPlayerBeenAskedQuestion(player)) {
+        if (parkour.getQuestionManager().hasBeenAskedQuestion(player)) {
             return QUESTION_ANSWER_COMMANDS;
         }
 
@@ -126,7 +129,7 @@ public class ParkourAutoTabCompleter extends AbstractPluginReceiver implements T
             allowedCommands.addAll(ON_COURSE_COMMANDS);
         }
         // the player has an outstanding challenge request
-        if (parkour.getChallengeManager().isPlayerInChallenge(player.getName())) {
+        if (parkour.getChallengeManager().hasPlayerBeenInvited(player)) {
             allowedCommands.add("accept");
             allowedCommands.add("decline");
         }
@@ -141,9 +144,6 @@ public class ParkourAutoTabCompleter extends AbstractPluginReceiver implements T
         if (PermissionUtils.hasPermission(player, Permission.BASIC_KIT, false)) {
             allowedCommands.add("kit");
             allowedCommands.add("listkit");
-        }
-        if (PermissionUtils.hasPermission(player, Permission.BASIC_CHALLENGE, false)) {
-            allowedCommands.add("challenge");
         }
         if (PermissionUtils.hasPermission(player, Permission.BASIC_TELEPORT, false)) {
             allowedCommands.add("tp");
@@ -167,7 +167,7 @@ public class ParkourAutoTabCompleter extends AbstractPluginReceiver implements T
         }
 
         // they've selected a known course, or they have admin course permission
-        if (PlayerInfo.hasSelectedValidCourse(player)
+        if (PlayerInfo.hasSelectedCourse(player)
                 || PermissionUtils.hasPermission(player, Permission.ADMIN_COURSE, false)) {
             allowedCommands.addAll(ADMIN_COURSE_COMMANDS);
         }
@@ -208,6 +208,9 @@ public class ParkourAutoTabCompleter extends AbstractPluginReceiver implements T
             case "cmds":
                 allowedCommands = COMMANDS_MENU;
                 break;
+            case "challenge":
+                allowedCommands = CHALLENGE_COMMANDS;
+                break;
             case "lobby":
                 allowedCommands = new ArrayList<>(LobbyInfo.getAllLobbyNames());
                 break;
@@ -231,6 +234,8 @@ public class ParkourAutoTabCompleter extends AbstractPluginReceiver implements T
             case "linkkit":
             case "setplayerlimit":
             case "stats":
+            case "settings":
+            case "challengeonly":
                 allowedCommands = CourseInfo.getAllCourseNames();
                 break;
             case "test":
@@ -296,6 +301,18 @@ public class ParkourAutoTabCompleter extends AbstractPluginReceiver implements T
                         break;
                 }
                 break;
+            case "challenge":
+                switch (arg1) {
+                    case "create":
+                        allowedCommands = CourseInfo.getAllCourseNames();
+                        break;
+                    case "invite":
+                        allowedCommands = getAllOnlinePlayerNames();
+                        break;
+                    default:
+                        break;
+                }
+                break;
             default:
                 break;
         }
@@ -316,10 +333,8 @@ public class ParkourAutoTabCompleter extends AbstractPluginReceiver implements T
             case "setcourse":
                 switch (arg2.toLowerCase()) {
                     case "message":
-                        allowedCommands = SetCourseConversation.MESSAGE_OPTIONS;
-                        break;
                     case "command":
-                        allowedCommands = SetCourseConversation.COMMAND_OPTIONS;
+                        allowedCommands = SetCourseConversation.PARKOUR_EVENT_TYPE_NAMES;
                         break;
                     default:
                         break;

@@ -16,18 +16,19 @@ import io.github.a5h73y.parkour.listener.PlayerInteractListener;
 import io.github.a5h73y.parkour.listener.PlayerListener;
 import io.github.a5h73y.parkour.listener.PlayerMoveListener;
 import io.github.a5h73y.parkour.listener.SignListener;
-import io.github.a5h73y.parkour.manager.ChallengeManager;
 import io.github.a5h73y.parkour.manager.QuestionManager;
 import io.github.a5h73y.parkour.manager.ScoreboardManager;
 import io.github.a5h73y.parkour.manager.SoundsManager;
 import io.github.a5h73y.parkour.other.Backup;
 import io.github.a5h73y.parkour.other.CommandUsage;
 import io.github.a5h73y.parkour.other.ParkourUpdater;
-import io.github.a5h73y.parkour.plugin.AACApi;
+import io.github.a5h73y.parkour.plugin.AacApi;
 import io.github.a5h73y.parkour.plugin.BountifulApi;
 import io.github.a5h73y.parkour.plugin.EconomyApi;
 import io.github.a5h73y.parkour.plugin.PlaceholderApi;
+import io.github.a5h73y.parkour.type.challenge.ChallengeManager;
 import io.github.a5h73y.parkour.type.checkpoint.CheckpointManager;
+import io.github.a5h73y.parkour.type.course.CourseInfo;
 import io.github.a5h73y.parkour.type.course.CourseManager;
 import io.github.a5h73y.parkour.type.kit.ParkourKitManager;
 import io.github.a5h73y.parkour.type.lobby.LobbyManager;
@@ -40,6 +41,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
@@ -47,7 +49,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 public class Parkour extends JavaPlugin {
 
-    public static final String PARKOUR = "parkour";
+    public static final String PLUGIN_NAME = "parkour";
 
     private static final int BSTATS_ID = 1181;
     private static final int SPIGOT_PLUGIN_ID = 23685;
@@ -89,7 +91,7 @@ public class Parkour extends JavaPlugin {
         instance = this;
 
         if (parkourNeedsUpgrading()) {
-            new ParkourUpgrader(this).begin();
+            upgradeParkour();
             return;
         }
 
@@ -100,12 +102,8 @@ public class Parkour extends JavaPlugin {
         setupPlugins();
 
         getLogger().info("Enabled Parkour v" + getDescription().getVersion());
-        new Metrics(this, BSTATS_ID);
+        submitAnalytics();
         checkForUpdates();
-
-        PluginUtils.log("v6.0 is currently a very unstable build, "
-                + "expect problems to occur and please raise them in the Discord server.", 2);
-        deleteMe();
     }
 
     /**
@@ -121,24 +119,6 @@ public class Parkour extends JavaPlugin {
         Bukkit.getScheduler().cancelTasks(this);
         PluginUtils.log("Disabled Parkour v" + getDescription().getVersion());
         instance = null;
-    }
-
-    // TODO delete me before release - old 6.0 -> new 6.0 workaround
-    private void deleteMe() {
-        if (getConfig().contains("Lobby.Set")) {
-            List<String> details = Arrays.asList("World", "X", "Y", "Z", "Pitch", "Yaw");
-
-            for (String detail : details) {
-                getConfig().set("Lobby.default." + detail, getConfig().get("Lobby." + detail));
-                getConfig().set("Lobby." + detail, null);
-            }
-
-            getConfig().set("LobbySettings.EnforceWorld", getConfig().getString("Lobby.EnforceWorld"));
-            getConfig().set("Lobby.Set", null);
-            getConfig().set("Lobby.EnforceWorld", null);
-            saveConfig();
-            PluginUtils.log("Your lobbies have been upgraded.");
-        }
     }
 
     /**
@@ -262,7 +242,7 @@ public class Parkour extends JavaPlugin {
         bountifulApi = new BountifulApi();
         economyApi = new EconomyApi();
         placeholderApi = new PlaceholderApi();
-        new AACApi();
+        new AacApi();
     }
 
     private void registerManagers() {
@@ -280,24 +260,17 @@ public class Parkour extends JavaPlugin {
     }
 
     private void registerCommands() {
-        getCommand(PARKOUR).setExecutor(new ParkourCommands(this));
+        getCommand(PLUGIN_NAME).setExecutor(new ParkourCommands(this));
         getCommand("paconsole").setExecutor(new ParkourConsoleCommands(this));
 
         if (this.getConfig().getBoolean("Other.UseAutoTabCompletion")) {
-            getCommand(PARKOUR).setTabCompleter(new ParkourAutoTabCompleter(this));
+            getCommand(PLUGIN_NAME).setTabCompleter(new ParkourAutoTabCompleter(this));
         }
 
         String json = new BufferedReader(new InputStreamReader(getResource("parkourCommands.json"), StandardCharsets.UTF_8))
                 .lines().collect(Collectors.joining("\n"));
 
         commandUsages = Arrays.asList(new GsonBuilder().create().fromJson(json, CommandUsage[].class));
-
-//        TODO - Run before release, orders json
-//        commandUsages = commandUsages.stream().sorted(Comparator.comparing(CommandUsage::getCommandGroup)
-//                        .thenComparing(CommandUsage::getCommand))
-//                        .collect(Collectors.toList());
-//        commandUsages.forEach(commandUsage -> System.out.println(commandUsage.getCommandGroup() + commandUsage.getCommand()));
-//        System.out.println(new Gson().toJson(commandUsages));
     }
 
     private void registerEvents() {
@@ -309,12 +282,19 @@ public class Parkour extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new SignListener(this), this);
     }
 
+    /**
+     * Check to see if a newer version exists on Spigot.
+     */
     private void checkForUpdates() {
         if (getConfig().getBoolean("Other.CheckForUpdates")) {
             new ParkourUpdater(this, SPIGOT_PLUGIN_ID).checkForUpdateAsync();
         }
     }
 
+    /**
+     * Check to see if the Parkour needs to upgrade.
+     * @return parkour needs to upgrade
+     */
     private boolean parkourNeedsUpgrading() {
         if (super.getConfig().contains("Version")) {
             double existingVersion = super.getConfig().getDouble("Version");
@@ -322,5 +302,26 @@ public class Parkour extends JavaPlugin {
             return existingVersion < currentVersion;
         }
         return false;
+    }
+
+    private void upgradeParkour() {
+        CompletableFuture.supplyAsync(() -> new ParkourUpgrader(this).get())
+                .thenAccept(success -> {
+                    if (success) {
+                        onEnable();
+                    }
+                });
+    }
+
+    /**
+     * Submit bStats analytics.
+     * Can be disabled through the bStats config.yml.
+     */
+    private void submitAnalytics() {
+        Metrics metrics = new Metrics(this, BSTATS_ID);
+        metrics.addCustomChart(new Metrics.SimplePie("number_of_courses", () ->
+                Integer.toString(CourseInfo.getAllCourseNames().size())));
+        metrics.addCustomChart(new Metrics.SingleLineChart("parkour_players", () ->
+                getPlayerManager().getNumberOfParkourPlayer()));
     }
 }

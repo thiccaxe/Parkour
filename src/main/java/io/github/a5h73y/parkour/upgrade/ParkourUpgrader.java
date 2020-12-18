@@ -5,12 +5,12 @@ import io.github.a5h73y.parkour.other.AbstractPluginReceiver;
 import io.github.a5h73y.parkour.other.Backup;
 import java.io.File;
 import java.io.IOException;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-public class ParkourUpgrader extends AbstractPluginReceiver {
+public class ParkourUpgrader extends AbstractPluginReceiver implements Supplier<Boolean> {
 
 	private final File defaultFile;
 	private final File playerFile;
@@ -26,7 +26,11 @@ public class ParkourUpgrader extends AbstractPluginReceiver {
 	private final FileConfiguration checkpointsConfig;
 	private final FileConfiguration stringsConfig;
 
-	public ParkourUpgrader(Parkour parkour) {
+	/**
+	 * Initialise the Parkour Upgrader.
+	 * @param parkour plugin instance
+	 */
+	public ParkourUpgrader(final Parkour parkour) {
 		super(parkour);
 
 		defaultFile = new File(parkour.getDataFolder(), "config.yml");
@@ -44,49 +48,51 @@ public class ParkourUpgrader extends AbstractPluginReceiver {
 		stringsConfig = YamlConfiguration.loadConfiguration(stringsFile);
 	}
 
-	public void begin() {
-		Bukkit.getScheduler().runTaskAsynchronously(parkour, () -> {
-			parkour.getLogger().info("=== Beginning Parkour Upgrade ===");
-			parkour.getLogger().info(String.format("Upgrading from v%s to v%s",
-					defaultConfig.getString("Version"), parkour.getDescription().getVersion()));
+	@Override
+	public Boolean get() {
+		parkour.getLogger().info("=== Beginning Parkour Upgrade ===");
+		parkour.getLogger().info(String.format("Upgrading from v%s to v%s",
+				defaultConfig.getString("Version"), parkour.getDescription().getVersion()));
 
-			parkour.getLogger().info("Creating backup of current install...");
-			Backup.backupNow(true);
+		parkour.getLogger().info("Creating backup of current install...");
+		Backup.backupNow(true);
 
-			if (!new PlayerInfoUpgradeTask(this).start()) {
-				return;
-			}
+		if (!new PlayerInfoUpgradeTask(this).start()) {
+			return false;
+		}
 
-			if (!new CourseInfoUpgradeTask(this).start()) {
-				return;
-			}
+		if (!new CourseInfoUpgradeTask(this).start()) {
+			return false;
+		}
 
-			if (!new StringsConfigUpgradeTask(this).start()) {
-				return;
-			}
+		if (!new StringsConfigUpgradeTask(this).start()) {
+			return false;
+		}
 
-			if (!new DefaultConfigUpgradeTask(this).start()) {
-				return;
-			}
+		if (!new DefaultConfigUpgradeTask(this).start()) {
+			return false;
+		}
 
-			// the database upgrade has to be done in two steps
-			// transferring the existing times to a temporary table, deleting the tables
-			// initialise the actual databases, then transfer the times back into it
-			DatabaseUpgradeTask databaseUpgrade = new DatabaseUpgradeTask(this);
-			if (!databaseUpgrade.start()) {
-				return;
-			}
+		// the database upgrade has to be done in two steps
+		// transferring the existing times to a temporary table, deleting the tables
+		// initialise the actual databases, then transfer the times back into it
+		DatabaseUpgradeTask databaseUpgrade = new DatabaseUpgradeTask(this);
+		if (!databaseUpgrade.start()) {
+			return false;
+		}
 
-			parkour.getLogger().info("Setting up Configs and Database...");
-			parkour.registerEssentialManagers();
+		parkour.getLogger().info("Setting up Configs and Database...");
+		parkour.registerEssentialManagers();
 
-			if (!databaseUpgrade.doMoreWork()) {
-				return;
-			}
+		if (!databaseUpgrade.doMoreWork()) {
+			return false;
+		}
 
-			parkour.getLogger().info("Parkour successfully upgraded to " + parkour.getDescription().getVersion());
-			parkour.getLogger().info("Please restart the server to start the plugin.");
-		});
+		parkour.getLogger().info("Parkour successfully upgraded to " + parkour.getDescription().getVersion());
+		parkour.getLogger().info("The plugin will now start up...");
+		parkour.reloadConfig();
+		parkour.onEnable();
+		return true;
 	}
 
 	public FileConfiguration getDefaultConfig() {

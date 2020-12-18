@@ -1,11 +1,13 @@
 package io.github.a5h73y.parkour.listener;
 
 import io.github.a5h73y.parkour.Parkour;
+import io.github.a5h73y.parkour.enums.GuiMenu;
 import io.github.a5h73y.parkour.enums.Permission;
 import io.github.a5h73y.parkour.other.AbstractPluginReceiver;
 import io.github.a5h73y.parkour.type.course.CourseInfo;
 import io.github.a5h73y.parkour.type.player.ParkourSession;
 import io.github.a5h73y.parkour.utility.PermissionUtils;
+import io.github.a5h73y.parkour.utility.PlayerUtils;
 import io.github.a5h73y.parkour.utility.SignUtils;
 import io.github.a5h73y.parkour.utility.TranslationUtils;
 import io.github.a5h73y.parkour.utility.ValidationUtils;
@@ -38,6 +40,11 @@ public class SignListener extends AbstractPluginReceiver implements Listener {
             case "join":
             case "j":
                 SignUtils.createJoinCourseSign(event, player);
+                break;
+
+            case "joinall":
+            case "ja":
+                SignUtils.createStandardSign(event, player, "JoinAll");
                 break;
 
             case "finish":
@@ -73,6 +80,11 @@ public class SignListener extends AbstractPluginReceiver implements Listener {
             case "checkpoint":
             case "c":
                 SignUtils.createCheckpointSign(event, player, "Checkpoint");
+                break;
+
+            case "challenge":
+            case "ch":
+                SignUtils.createStandardCourseSign(event, player, "Challenge");
                 break;
 
             default:
@@ -162,6 +174,14 @@ public class SignListener extends AbstractPluginReceiver implements Listener {
                 parkour.getPlayerManager().joinCourse(player, lines[2]);
                 break;
 
+            case "joinall":
+                if (!PermissionUtils.hasPermission(player, Permission.BASIC_JOINALL)) {
+                    return;
+                }
+
+                parkour.getGuiManager().showMenu(player, GuiMenu.JOIN_COURSES);
+                break;
+
             case "checkpoint":
                 if (lines[2].isEmpty() || !parkour.getCourseManager().doesCourseExists(lines[2])) {
                     TranslationUtils.sendValueTranslation("Error.NoExist", lines[2], player);
@@ -226,7 +246,7 @@ public class SignListener extends AbstractPluginReceiver implements Listener {
                 break;
 
             case "effect":
-                parkour.getPlayerManager().applyEffect(player, lines);
+                applyEffect(player, lines[2], lines[3]);
                 break;
 
             case "leaderboards":
@@ -240,9 +260,39 @@ public class SignListener extends AbstractPluginReceiver implements Listener {
                 }
                 break;
 
+            case "challenge":
+                if (lines[2].isEmpty() || !parkour.getCourseManager().doesCourseExists(lines[2])) {
+                    TranslationUtils.sendValueTranslation("Error.NoExist", lines[2], player);
+                    return;
+                }
+
+                parkour.getChallengeManager().createOrJoinChallenge(player, lines[2], lines[3]);
+                break;
+
             default:
                 TranslationUtils.sendTranslation("Error.UnknownSignCommand", player);
                 break;
+        }
+    }
+
+    private void applyEffect(Player player, String effect, String argument) {
+        if (effect.equalsIgnoreCase("heal")) {
+            PlayerUtils.fullyHealPlayer(player);
+
+        } else if (effect.equalsIgnoreCase("gamemode")) {
+            PlayerUtils.applyGameModeChange(player, argument);
+
+        } else {
+            // if the user enters 'FIRE_RESISTANCE' or 'DAMAGE_RESIST' treat them the same
+            String effectName = effect.toUpperCase().replace("RESISTANCE", "RESIST").replace("RESIST", "RESISTANCE");
+
+            String[] args = argument.split(":");
+            if (args.length == 2) {
+                PlayerUtils.applyPotionEffect(effectName, Integer.parseInt(args[1]), Integer.parseInt(args[0]), player);
+                TranslationUtils.sendMessage(player, effectName + " Effect Applied!");
+            } else {
+                TranslationUtils.sendMessage(player, "Invalid syntax, must follow '(duration):(strength)' example '1000:6'.");
+            }
         }
     }
 }

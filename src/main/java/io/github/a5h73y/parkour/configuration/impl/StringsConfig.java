@@ -64,15 +64,21 @@ public class StringsConfig extends ParkourConfiguration {
 		this.addDefault("Parkour.TestModeOn", "Test Mode: &bON&f. Simulating &b%VALUE%&f ParkourKit.");
 		this.addDefault("Parkour.TestModeOff", "Test Mode: &bOFF");
 		this.addDefault("Parkour.Challenge.Receive", "You have been challenged by &b%PLAYER% &fto course &b%COURSE%");
-		this.addDefault("Parkour.Challenge.Send", "You have challenged &b%PLAYER% &fto course &b%COURSE%");
-		this.addDefault("Parkour.Challenge.Wager", " &fwith a wager of &b%VALUE%");
-		this.addDefault("Parkour.Challenge.Terminated", "&b%VALUE% &fhas terminated the challenge!");
-		this.addDefault("Parkour.Challenge.Forfeited", "&b%VALUE% &fhas forfeited the challenge. Complete the course to win!");
-		this.addDefault("Parkour.Challenge.Quit", "You have forfeited the challenge. &b%VALUE% &fmust complete the course to win!");
-		this.addDefault("Parkour.Challenge.Winner", "Congratulations! You beat &b%PLAYER% &fat &b%COURSE%!");
-		this.addDefault("Parkour.Challenge.Loser", "&b%PLAYER% &fhas completed &b%COURSE% &fbefore you!");
 		this.addDefault("Parkour.AlreadyCompleted", "You have already completed this course.");
 		this.addDefault("Parkour.Question", "Please enter &a/pa yes &fto confirm, or &c/pa no &fto cancel.");
+
+		this.addDefault("Parkour.Challenge.Created", "Challenge for &b%VALUE% &fcreated");
+		this.addDefault("Parkour.Challenge.StartCommand", "When ready, enter &b/pa challenge start");
+		this.addDefault("Parkour.Challenge.Wager", " &fwith a wager of &b%VALUE%&f!");
+		this.addDefault("Parkour.Challenge.InviteSent", "A Challenge invite was sent to &b%VALUE%&f!");
+		this.addDefault("Parkour.Challenge.InviteReceived", "You have been Challenged to &b%COURSE% &fby &b%PLAYER%&f!");
+		this.addDefault("Parkour.Challenge.AcceptDecline", "To accept &a/pa accept &for &c/pa decline &fto decline.");
+		this.addDefault("Parkour.Challenge.Joined", "You have joined a Challenge on &b%VALUE%&f. Please wait until the host starts.");
+		this.addDefault("Parkour.Challenge.Terminated", "&b%VALUE% &fhas terminated the challenge!");
+		this.addDefault("Parkour.Challenge.Forfeited", "&b%VALUE% &fhas forfeited the challenge. Complete the course to win!");
+		this.addDefault("Parkour.Challenge.Quit", "You have forfeited the challenge. Another player must complete the course to win!");
+		this.addDefault("Parkour.Challenge.Winner", "Congratulations! You won the challenge on &b%VALUE%!");
+		this.addDefault("Parkour.Challenge.Loser", "&b%PLAYER% &fhas completed &b%COURSE% &fbefore you!");
 
 		this.addDefault("Event.Join", "This server uses &bParkour &3%VALUE%");
 		this.addDefault("Event.Checkpoint", "Checkpoint set to &b%CURRENT% &8/ &7%TOTAL%");
@@ -120,12 +126,16 @@ public class StringsConfig extends ParkourConfiguration {
 		this.addDefault("Error.InvalidQuestionAnswer", "Invalid Question Answer.");
 		this.addDefault("Error.QuestionAnswerChoices", "Please use either &a/pa yes &for &c/pa no");
 		this.addDefault("Error.LimitExceeded", "The player limit for the course has been reached.");
+		this.addDefault("Error.InvalidSession", "Your ParkourSession is invalid.");
+		this.addDefault("Error.ChallengeOnly", "This Course is limited to Challenges only.");
+		this.addDefault("Error.OnChallenge", "You are already in a Challenge.");
 
 		this.addDefault("Help.Command", "&7/pa help &9%VALUE% &0: &7To learn more about the command.");
 		this.addDefault("Help.Commands", "To display the commands menu, enter &b/pa cmds");
 		this.addDefault("Help.ConsoleCommands", "To display all commands, enter &f/pac cmds");
 		this.addDefault("Help.SignCommands", "To display the sign commands menu, enter &b/pa cmds signs");
 		this.addDefault("Help.CommandSyntax", "&7Syntax: &f/pa %VALUE%");
+		this.addDefault("Help.ConsoleCommandSyntax", "&7Syntax: &f%VALUE%");
 		this.addDefault("Help.CommandExample", "&7Example: &f%VALUE%");
 		this.addDefault("Help.CommandUsage", "&3/pa &b%COMMAND%&e%ARGUMENTS% &0: &f%TITLE%");
 		this.addDefault("Help.SignUsage", "&b%COMMAND% &e%SHORTCUT% &0: &f%DESCRIPTION%");
@@ -178,8 +188,11 @@ public class StringsConfig extends ParkourConfiguration {
 		this.addDefault("Mode.Rockets.JoinText", "Use the Rocket Launcher to launch yourself");
 		this.addDefault("Mode.Rockets.ItemName", "Rocket Launcher");
 
-		this.addDefault("Placeholder.InvalidSyntax", "Invalid syntax");
-		this.addDefault("Placeholder.NoTimeRecorded", "No time recorded");
+		this.addDefault("PlaceholderAPI.InvalidSyntax", "Invalid syntax");
+		this.addDefault("PlaceholderAPI.NoTimeRecorded", "No time recorded");
+		this.addDefault("PlaceholderAPI.CurrentCourseCompleted", "Yes");
+		this.addDefault("PlaceholderAPI.CurrentCourseNotCompleted", "No");
+		this.addDefault("PlaceholderAPI.TopTenResult", "&f%POSITION%) &b%PLAYER%&f in &a%TIME%");
 
 		this.addDefault("GUI.JoinCourses.Heading", "Parkour Courses");
 		this.addDefault("GUI.JoinCourses.Setup.Line1", "         ");
@@ -188,6 +201,10 @@ public class StringsConfig extends ParkourConfiguration {
 		this.addDefault("GUI.JoinCourses.Description", "&fJoin &b%VALUE%");
 		this.addDefault("GUI.JoinCourses.Players", "Players: &b%VALUE%");
 		this.addDefault("GUI.JoinCourses.Checkpoints", "Checkpoints: &b%VALUE%");
+		this.addDefault("GUI.CourseSettings.Heading", "%VALUE% Settings");
+		this.addDefault("GUI.CourseSettings.Setup.Line1", "   zxc   ");
+		this.addDefault("GUI.CourseSettings.Setup.Line2", " qwertyu ");
+		this.addDefault("GUI.CourseSettings.Setup.Line3", " ioasdgh ");
 
 //		this.addDefault("Display.TimeFormat", "HH:mm:ss:MMM");
 //		this.addDefault("Display.DateFormat", "dd/MM/yyyy");

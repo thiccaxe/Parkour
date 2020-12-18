@@ -29,7 +29,7 @@ public class ChatListener extends AbstractPluginReceiver implements Listener {
         }
 
         String finalMessage;
-        String rank = PlayerInfo.getRank(event.getPlayer());
+        String rank = PlayerInfo.getParkourRank(event.getPlayer());
 
         // should we completely override the chat format
         if (parkour.getConfig().isChatPrefixOverride()) {
@@ -49,7 +49,7 @@ public class ChatListener extends AbstractPluginReceiver implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onCommandPreprocess(PlayerCommandPreprocessEvent event) {
-        List<String> aliases = parkour.getCommand(Parkour.PARKOUR).getAliases();
+        List<String> aliases = parkour.getCommand(Parkour.PLUGIN_NAME).getAliases();
 
         // if the command is "parkour" or an alias.
         boolean isParkourCommand = event.getMessage().startsWith("/parkour")
@@ -57,7 +57,7 @@ public class ChatListener extends AbstractPluginReceiver implements Listener {
 
         Player player = event.getPlayer();
 
-        if (isParkourCommand && parkour.getQuestionManager().hasPlayerBeenAskedQuestion(player)) {
+        if (isParkourCommand && parkour.getQuestionManager().hasBeenAskedQuestion(player)) {
             String[] args = event.getMessage().split(" ");
             if (args.length <= 1) {
                 TranslationUtils.sendTranslation("Error.InvalidQuestionAnswer", player);

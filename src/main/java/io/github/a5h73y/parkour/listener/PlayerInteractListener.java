@@ -1,5 +1,7 @@
 package io.github.a5h73y.parkour.listener;
 
+import com.cryptomorin.xseries.XBlock;
+import com.cryptomorin.xseries.XMaterial;
 import io.github.a5h73y.parkour.Parkour;
 import io.github.a5h73y.parkour.enums.ParkourMode;
 import io.github.a5h73y.parkour.other.AbstractPluginReceiver;
@@ -8,8 +10,6 @@ import io.github.a5h73y.parkour.type.player.ParkourSession;
 import io.github.a5h73y.parkour.utility.MaterialUtils;
 import io.github.a5h73y.parkour.utility.PluginUtils;
 import io.github.a5h73y.parkour.utility.TranslationUtils;
-import com.cryptomorin.xseries.XBlock;
-import com.cryptomorin.xseries.XMaterial;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -116,10 +116,11 @@ public class PlayerInteractListener extends AbstractPluginReceiver implements Li
 
         event.setCancelled(true);
 
-        if (mode == ParkourMode.FREEDOM && MaterialUtils.getMaterialInPlayersHand(player) == XMaterial.REDSTONE_TORCH.parseMaterial()) {
+        if (mode == ParkourMode.FREEDOM
+                && MaterialUtils.getMaterialInPlayersHand(player) == XMaterial.REDSTONE_TORCH.parseMaterial()) {
             if (event.getAction().equals(Action.RIGHT_CLICK_BLOCK) || event.getAction().equals(Action.RIGHT_CLICK_AIR)) {
-                parkour.getPlayerManager().getParkourSession(player)
-                        .setFreedomLocation(parkour.getCheckpointManager().createCheckpointFromPlayerLocation(player).getLocation());
+                parkour.getPlayerManager().getParkourSession(player).setFreedomLocation(
+                        parkour.getCheckpointManager().createCheckpointFromPlayerLocation(player).getLocation());
                 TranslationUtils.sendTranslation("Mode.Freedom.Save", player);
 
             } else {
@@ -127,11 +128,12 @@ public class PlayerInteractListener extends AbstractPluginReceiver implements Li
                 TranslationUtils.sendTranslation("Mode.Freedom.Load", player);
             }
 
-        } else if (mode == ParkourMode.ROCKETS && MaterialUtils.getMaterialInPlayersHand(player) == XMaterial.FIREWORK_ROCKET.parseMaterial()) {
-            if (event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
-                if (parkour.getPlayerManager().delayPlayer(player, 1, false)) {
-                    parkour.getPlayerManager().rocketLaunchPlayer(player);
-                }
+        } else if (mode == ParkourMode.ROCKETS
+                && MaterialUtils.getMaterialInPlayersHand(player) == XMaterial.FIREWORK_ROCKET.parseMaterial()) {
+
+            int secondDelay = parkour.getConfig().getInt("ParkourModes.Rockets.Delay");
+            if (parkour.getPlayerManager().delayPlayer(player, secondDelay, true, false)) {
+                parkour.getPlayerManager().rocketLaunchPlayer(player);
             }
         }
     }
@@ -170,8 +172,9 @@ public class PlayerInteractListener extends AbstractPluginReceiver implements Li
         if (checkpoint.getNextCheckpointX() == below.getBlockX()
                 && checkpoint.getNextCheckpointY() == below.getBlockY()
                 && checkpoint.getNextCheckpointZ() == below.getBlockZ()) {
-            if (parkour.getConfig().isFirstCheckAsStart() && session.getCurrentCheckpoint() == 0) {
-                session.resetTimeStarted();
+            if (parkour.getConfig().isTreatFirstCheckpointAsStart() && session.getCurrentCheckpoint() == 0) {
+                session.resetTime();
+                session.setStartTimer(true);
                 parkour.getBountifulApi().sendActionBar(event.getPlayer(),
                         TranslationUtils.getTranslation("Parkour.TimerStarted", false), true);
             }
@@ -182,10 +185,6 @@ public class PlayerInteractListener extends AbstractPluginReceiver implements Li
     @EventHandler
     public void onAutoStartEvent(PlayerInteractEvent event) {
         if (event.getAction() != Action.PHYSICAL) {
-            return;
-        }
-
-        if (parkour.getPlayerManager().isPlaying(event.getPlayer())) {
             return;
         }
 
@@ -200,14 +199,22 @@ public class PlayerInteractListener extends AbstractPluginReceiver implements Li
         }
 
         // Prevent a user spamming the joins
-        if (!parkour.getPlayerManager().delayPlayer(event.getPlayer(), 3, false)) {
+        if (!parkour.getPlayerManager().delayPlayer(event.getPlayer(), 1, false)) {
             return;
         }
 
         String courseName = parkour.getCourseManager().getAutoStartCourse(event.getClickedBlock().getLocation());
 
         if (courseName != null) {
-            parkour.getPlayerManager().joinCourseButDelayed(event.getPlayer(), courseName, parkour.getConfig().getAutoStartDelay());
+            ParkourSession session = parkour.getPlayerManager().getParkourSession(event.getPlayer());
+            if (session != null && session.getCourseName().equals(courseName)) {
+                session.resetTime();
+                parkour.getBountifulApi().sendActionBar(event.getPlayer(),
+                        TranslationUtils.getTranslation("Parkour.TimerStarted", false), true);
+            } else {
+                parkour.getPlayerManager().joinCourseButDelayed(
+                        event.getPlayer(), courseName, parkour.getConfig().getAutoStartDelay());
+            }
         }
     }
 }

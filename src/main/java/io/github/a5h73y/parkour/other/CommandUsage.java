@@ -2,6 +2,7 @@ package io.github.a5h73y.parkour.other;
 
 import io.github.a5h73y.parkour.utility.TranslationUtils;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 
 public class CommandUsage {
 
@@ -21,15 +22,33 @@ public class CommandUsage {
 
 	private String consoleSyntax;
 
+	/**
+	 * Display Help Information for the Command.
+	 * Includes usage information and a description of the command.
+	 * Will display appropriate information based on the type of sender.
+	 *
+	 * @param sender requesting sender
+	 */
 	public void displayHelpInformation(CommandSender sender) {
 		TranslationUtils.sendHeading(title, sender);
-		String commandSyntax = arguments != null ? command + " " + arguments : command;
-		sender.sendMessage(TranslationUtils.getValueTranslation("Help.CommandSyntax", commandSyntax, false));
-		sender.sendMessage(TranslationUtils.getValueTranslation("Help.CommandExample", example, false));
+
+		if (sender instanceof ConsoleCommandSender) {
+			TranslationUtils.sendValueTranslation("Help.ConsoleCommandSyntax", consoleSyntax, false, sender);
+
+		} else {
+			String commandSyntax = arguments != null ? command + " " + arguments : command;
+			TranslationUtils.sendValueTranslation("Help.CommandSyntax", commandSyntax, false, sender);
+		}
+		TranslationUtils.sendValueTranslation("Help.CommandExample", example, false, sender);
 		TranslationUtils.sendHeading("Description", sender);
 		sender.sendMessage(description);
 	}
 
+	/**
+	 * Display Command Usage.
+	 * Formats the information to display command syntax and brief command title.
+	 * @param sender requesting sender
+	 */
 	public void displayCommandUsage(CommandSender sender) {
 		sender.sendMessage(TranslationUtils.getTranslation("Help.CommandUsage", false)
 				.replace("%COMMAND%", command)
