@@ -23,6 +23,10 @@ To keep a single database row per player per Course, in the `config.yml` find `O
 
 To allow for multiple players to stand on a pressure plate at once, in the `config.yml` find `OnCourse.PreventPlateStick` and set it to `true`.
 
+##### Available Placeholders 
+
+Each of the Parkour placeholders are available here: [Parkour Placeholders](/tutorials/compatible-plugins?id=parkour-placeholders)
+
 ## Permissions
 
 | Permission Node | Description |
@@ -89,7 +93,7 @@ To allow for multiple players to stand on a pressure plate at once, in the `conf
         return `<details>
                 <summary>${command.command} - ${command.title}</summary>
                 <div>
-                    <p>Syntax: <code>/pa ${command.command} ${command.arguments}</code></p>
+                    <p>Syntax: <code>/pa ${command.command} ${command.arguments || ''}</code></p>
                     <p>Example: <code>${command.example}</code></p>
                     <p>Description: ${command.description}</p>
                     <p>Permission: ${command.permission || 'None required'}</p>

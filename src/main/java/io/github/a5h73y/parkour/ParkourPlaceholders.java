@@ -30,7 +30,7 @@ public class ParkourPlaceholders extends PlaceholderExpansion {
     private final GenericCache<String, String> cache;
 
     /**
-     * Contruct the Parkour Placeholders functionality.
+     * Construct the Parkour Placeholders functionality.
      * A Cache is used for repeated expensive calls to the database.
      * @param parkour plugin instance
      */
@@ -42,7 +42,7 @@ public class ParkourPlaceholders extends PlaceholderExpansion {
     @NotNull
     @Override
     public String getIdentifier() {
-        return parkour.getName();
+        return parkour.getName().toLowerCase();
     }
 
     @NotNull
@@ -179,6 +179,16 @@ public class ParkourPlaceholders extends PlaceholderExpansion {
                     }
                 }
                 return INVALID_SYNTAX;
+
+            case "personal":
+                if (arguments.length != 5 && !arguments[2].equals("best")) {
+                    return INVALID_SYNTAX;
+                }
+                Player player = offlinePlayer.getPlayer();
+                if (player == null) {
+                    return "";
+                }
+                return getPersonalCourseRecord(player, arguments[3], arguments[4]);
 
             default:
                 return INVALID_SYNTAX;
@@ -344,7 +354,8 @@ public class ParkourPlaceholders extends PlaceholderExpansion {
     }
 
     private String getOrRetrieveCache(String key, Supplier<String> callback) {
-        if (!cache.containsKey(key)) {
+        // check if the key exists or its 'get' is about to expire.
+        if (!cache.containsKey(key) || !cache.get(key).isPresent()) {
             cache.put(key, callback.get());
         }
 

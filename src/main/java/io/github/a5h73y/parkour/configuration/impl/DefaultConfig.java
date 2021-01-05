@@ -68,6 +68,7 @@ public class DefaultConfig extends ParkourConfiguration {
 		this.addDefault("OnCourse.PreventJoiningDifferentCourse", false);
 		this.addDefault("OnCourse.PreventPlayerCollisions", false);
 		this.addDefault("OnCourse.SneakToInteractItems", true);
+		this.addDefault("OnCourse.TreatLastCheckpointAsFinish", false);
 		this.addDefault("OnCourse.UseParkourKit", true);
 		this.addDefault("OnCourse.EnforceParkourCommands.Enabled", true);
 		this.addDefault("OnCourse.EnforceParkourCommands.Whitelist", Collections.singletonList("login"));
@@ -80,16 +81,17 @@ public class DefaultConfig extends ParkourConfiguration {
 		this.addDefault("OnFinish.DisplayStats", true);
 		this.addDefault("OnFinish.EnablePrizes", true);
 		this.addDefault("OnFinish.EnforceCompletion", true);
-		this.addDefault("OnFinish.CompletedCourses.Enabled", false);
-		this.addDefault("OnFinish.CompletedCourses.JoinMessage", true);
+		this.addDefault("OnFinish.CompletedCourses.Enabled", true);
+		this.addDefault("OnFinish.CompletedCourses.JoinMessage", false);
 		this.addDefault("OnFinish.SetGameMode", "SURVIVAL");
 		this.addDefault("OnFinish.TeleportAway", true);
 		this.addDefault("OnFinish.TeleportDelay", 0);
 		this.addDefault("OnFinish.TeleportToJoinLocation", false);
-		this.addDefault("OnFinish.UpdatePlayerDatabaseTime", false);
+		this.addDefault("OnFinish.UpdatePlayerDatabaseTime", true);
 
 		this.addDefault("OnLeave.TeleportToLinkedLobby", false);
 		this.addDefault("OnLeave.DestroyCourseProgress", true);
+		this.addDefault("OnLeave.TeleportAway", true);
 
 		this.addDefault("OnDie.ResetTimeWithNoCheckpoint", false);
 		this.addDefault("OnDie.SetXPBarToDeathCount", false);
@@ -120,6 +122,7 @@ public class DefaultConfig extends ParkourConfiguration {
 		this.addDefault("AutoStart.Enabled", true);
 		this.addDefault("AutoStart.Material", "BEDROCK");
 		this.addDefault("AutoStart.TickDelay", 0);
+		this.addDefault("AutoStart.IncludeWorldName", false);
 
 		this.addDefault("Scoreboard.Enabled", false);
 		this.addDefault("Scoreboard.CourseName.Enabled", true);
@@ -163,8 +166,6 @@ public class DefaultConfig extends ParkourConfiguration {
 		this.addDefault("Sounds.CourseFailed.Volume", 0.1f);
 		this.addDefault("Sounds.CourseFailed.Pitch", 1.75f);
 
-		this.addDefault("ParkourGUI.Enabled", false);
-		this.addDefault("ParkourGUI.Rows", 2);
 		this.addDefault("ParkourGUI.Material", "BOOK");
 		this.addDefault("ParkourGUI.FillerMaterial", "CYAN_STAINED_GLASS_PANE");
 
@@ -188,6 +189,8 @@ public class DefaultConfig extends ParkourConfiguration {
 		this.addDefault("Other.Display.OnlyReadyCourses", false);
 		this.addDefault("Other.OnServerShutdown.BackupFiles", false);
 		this.addDefault("Other.OnPlayerBan.ResetParkourInfo", false);
+		this.addDefault("Other.OnSetPlayerParkourLevel.UpdateParkourRank", true);
+		this.addDefault("Other.OnVoid.TeleportToLobby", false);
 
 		this.addDefault("Plugin.BountifulAPI.Enabled", true);
 		this.addDefault("Plugin.Vault.Enabled", true);
@@ -203,7 +206,7 @@ public class DefaultConfig extends ParkourConfiguration {
 		this.addDefault("MySQL.Password", "Password");
 		this.addDefault("MySQL.LegacyDriver", false);
 
-		this.addDefault("Version", Double.parseDouble(Parkour.getInstance().getDescription().getVersion()));
+		this.addDefault("Version", Parkour.getInstance().getDescription().getVersion());
 
 		this.addDefault("LobbySettings.EnforceWorld", false);
 
@@ -318,6 +321,10 @@ public class DefaultConfig extends ParkourConfiguration {
 		return this.getBoolean("AutoStart.Enabled");
 	}
 
+	public boolean isAutoStartIncludeWorld() {
+		return this.getBoolean("AutoStart.IncludeWorldName");
+	}
+
 	public boolean isTeleportToJoinLocation() {
 		return this.getBoolean("OnFinish.TeleportToJoinLocation");
 	}
@@ -336,6 +343,10 @@ public class DefaultConfig extends ParkourConfiguration {
 
 	public boolean isLegacyGroundDetection() {
 		return this.getBoolean("Other.ParkourKit.LegacyGroundDetection");
+	}
+
+	public boolean isVoidDetection() {
+		return this.getBoolean("Other.OnVoid.TeleportToLobby");
 	}
 
 	/* Materials */

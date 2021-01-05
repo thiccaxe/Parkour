@@ -1,8 +1,6 @@
 Rewarding the Player
 ======
 
-## Description
-
 There are several ways we can reward the player for completing a Course. We are able to reward the Player with ParkourLevels that allow them to unlock new courses, or achieve a ParkourRank that showcases how far they've progressed. All can be configured to match any server requirements, and even allow developers to natively add their own functionality.
 
 ## Course Prizes
@@ -103,7 +101,7 @@ If you choose to extend your current chat plugin, you must set `Other.Parkour.Ch
 
 ## Delaying / Limiting the Rewards
 
-You are able to delay the time a reward is given to the player in days. For example the player could receive the prize on their first completion, but may have to wait 2 full days before they are able to receive the prize again. This is achieved by entering `/pa rewarddelay (course) (days)`.
+You are able to delay the time a reward is given to the player in hours, including decimals such as '0.5' = 30 minutes, or '48' = 2 full days. For example the player could receive the prize on their first completion, but may have to wait 2 full days before they are able to receive the prize again. This is achieved by entering `/pa rewarddelay (course) (hours)`.
 
 You can also have the player only be rewarded a single time after they complete a course. This is heavily recommended if you are doing anything advanced with ParkourLevels, such as using rewardleveladd. This is achieved by entering `/pa rewardonce (course)`.
 

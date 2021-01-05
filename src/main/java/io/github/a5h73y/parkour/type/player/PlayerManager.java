@@ -335,11 +335,13 @@ public class PlayerManager extends AbstractPluginReceiver {
 							session.getCourse().getName(), LEAVE, "Parkour.Leave"),
 					parkour.getConfig().getBoolean("DisplayTitle.Leave"));
 
-			if (parkour.getConfig().isTeleportToJoinLocation()
-					&& PlayerInfo.hasJoinLocation(player)) {
-				player.teleport(PlayerInfo.getJoinLocation(player));
-			} else {
-				parkour.getLobbyManager().teleportToLeaveDestination(player, session);
+			if (parkour.getConfig().getBoolean("OnLeave.TeleportAway")) {
+				if (parkour.getConfig().isTeleportToJoinLocation()
+						&& PlayerInfo.hasJoinLocation(player)) {
+					player.teleport(PlayerInfo.getJoinLocation(player));
+				} else {
+					parkour.getLobbyManager().teleportToLeaveDestination(player, session);
+				}
 			}
 			parkour.getCourseManager().runEventCommands(player, session.getCourseName(), LEAVE);
 		}
@@ -365,20 +367,26 @@ public class PlayerManager extends AbstractPluginReceiver {
 		}
 
 		session.increaseCheckpoint();
-		parkour.getSoundsManager().playSound(player, SoundType.CHECKPOINT_ACHIEVED);
-		parkour.getScoreboardManager().updateScoreboardCheckpoints(player, session);
 		parkour.getCourseManager().runEventCommands(player, session.getCourseName(), CHECKPOINT);
-
-		boolean showTitle = parkour.getConfig().getBoolean("DisplayTitle.Checkpoint");
 
 		ParkourEventType eventType = CHECKPOINT;
 		String checkpointTranslation = "Event.Checkpoint";
 
 		if (session.hasAchievedAllCheckpoints()) {
+			if (parkour.getConfig().getBoolean("OnCourse.TreatLastCheckpointAsFinish")) {
+				Bukkit.getScheduler().scheduleSyncDelayedTask(parkour, () -> finishCourse(player));
+				return;
+			}
+
 			parkour.getCourseManager().runEventCommands(player, session.getCourseName(), CHECKPOINT_ALL);
 			eventType = CHECKPOINT_ALL;
 			checkpointTranslation = "Event.AllCheckpoints";
 		}
+
+		parkour.getSoundsManager().playSound(player, SoundType.CHECKPOINT_ACHIEVED);
+		parkour.getScoreboardManager().updateScoreboardCheckpoints(player, session);
+
+		boolean showTitle = parkour.getConfig().getBoolean("DisplayTitle.Checkpoint");
 
 		String checkpointMessage = TranslationUtils.getCourseEventMessage(session.getCourse().getName(),
 				eventType, checkpointTranslation)
@@ -580,6 +588,17 @@ public class PlayerManager extends AbstractPluginReceiver {
 	 * @param player requesting player
 	 */
 	public void restartCourse(Player player) {
+		restartCourse(player, false);
+	}
+
+	/**
+	 * Restart Course progress.
+	 * Will trigger a silent leave and rejoin of the Course.
+	 *
+	 * @param player requesting player
+	 * @param doNotTeleport do not teleport the player manually
+	 */
+	public void restartCourse(Player player, boolean doNotTeleport) {
 		if (!isPlaying(player)) {
 			return;
 		}
@@ -589,7 +608,7 @@ public class PlayerManager extends AbstractPluginReceiver {
 		deleteParkourSession(player);
 		joinCourse(player, course, true);
 		// if they are restarting the Course, we need to teleport them back
-		if (!parkour.getConfig().getBoolean("OnJoin.TeleportPlayer")) {
+		if (!doNotTeleport && !parkour.getConfig().getBoolean("OnJoin.TeleportPlayer")) {
 			player.teleport(course.getCheckpoints().get(0).getLocation());
 		}
 		TranslationUtils.sendTranslation("Parkour.Restarting", player);
@@ -1098,6 +1117,13 @@ public class PlayerManager extends AbstractPluginReceiver {
 		int newLevel = Integer.parseInt(value);
 		PlayerInfo.setParkourLevel(targetPlayer, newLevel);
 		TranslationUtils.sendMessage(sender, targetPlayer.getName() + "'s ParkourLevel was set to &b" + newLevel);
+
+		if (parkour.getConfig().getBoolean("Other.OnSetPlayerParkourLevel.UpdateParkourRank")) {
+			String parkourRank = getUnlockedParkourRank(targetPlayer, newLevel);
+			if (parkourRank != null) {
+				setParkourRank(sender, targetPlayer, parkourRank);
+			}
+		}
 	}
 
 	/**
@@ -1300,7 +1326,8 @@ public class PlayerManager extends AbstractPluginReceiver {
 	 * @param rewardLevel rewarded ParkourLevel
 	 * @return unlocked ParkourRank
 	 */
-	public String getUnlockedParkourRank(Player player, int rewardLevel) {
+	@Nullable
+	public String getUnlockedParkourRank(OfflinePlayer player, int rewardLevel) {
 		int currentLevel = PlayerInfo.getParkourLevel(player);
 		String result = null;
 
@@ -1459,9 +1486,7 @@ public class PlayerManager extends AbstractPluginReceiver {
 	 */
 	private void restoreHealthHunger(Player player) {
 		double health = PlayerInfo.getSavedHealth(player);
-		if (health <= 0) {
-			health = player.getMaxHealth();
-		}
+		health = Math.min(Math.max(0, health), player.getMaxHealth());
 		player.setHealth(health);
 		player.setFoodLevel(PlayerInfo.getSavedFoodLevel(player));
 		PlayerInfo.resetSavedHealthFoodLevel(player);

@@ -11,10 +11,12 @@ import io.github.a5h73y.parkour.type.player.PlayerInfo;
 import io.github.a5h73y.parkour.utility.PluginUtils;
 import io.github.a5h73y.parkour.utility.TranslationUtils;
 import io.github.a5h73y.parkour.utility.ValidationUtils;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -100,6 +102,19 @@ public class LobbyManager extends AbstractPluginReceiver implements Cacheable<Lo
     }
 
     /**
+     * Teleport the Player to the nearest Lobby available.
+     * @param player player
+     */
+    public void teleportToNearestLobby(Player player) {
+        Lobby lobby = getNearestLobby(player);
+        if (lobby != null) {
+            player.setFallDistance(0);
+            player.teleport(lobby.getLocation());
+            TranslationUtils.sendValueTranslation("Parkour.LobbyOther", lobby.getName(), player);
+        }
+    }
+
+    /**
      * Delete a Parkour Lobby.
      * All references to the Lobby will be deleted.
      *
@@ -167,8 +182,9 @@ public class LobbyManager extends AbstractPluginReceiver implements Cacheable<Lo
      * @param lobbyName lobby name
      * @return populated Lobby
      */
-    private Lobby populateLobby(String lobbyName) {
-        Lobby lobby = new Lobby(LobbyInfo.getLobbyLocation(lobbyName), LobbyInfo.getRequiredLevel(lobbyName));
+    private Lobby populateLobby(@NotNull String lobbyName) {
+        Lobby lobby = new Lobby(lobbyName.toLowerCase(),
+                LobbyInfo.getLobbyLocation(lobbyName), LobbyInfo.getRequiredLevel(lobbyName));
         lobbyCache.put(lobbyName.toLowerCase(), lobby);
         return lobby;
     }
@@ -182,5 +198,22 @@ public class LobbyManager extends AbstractPluginReceiver implements Cacheable<Lo
     private void setLobby(Player player, String lobbyName) {
         LobbyInfo.setLobby(lobbyName, player.getLocation());
         PluginUtils.logToFile(lobbyName + " lobby was set by " + player.getName());
+    }
+
+    /**
+     * Find the nearest valid Lobby to the Player.
+     * If no nearest lobby was found, the default lobby will be returned.
+     * If no lobby was set, null is returned.
+     *
+     * @param player player
+     * @return nearest lobby to Location
+     */
+    @Nullable
+    private Lobby getNearestLobby(Player player) {
+        return lobbyCache.values().stream()
+                .filter(lobby -> lobby.getLocation().getWorld() == player.getWorld())
+                .filter(lobby -> ParkourValidation.canJoinLobbySilent(player, lobby.getName()))
+                .min(Comparator.comparingDouble(o -> player.getLocation().distanceSquared(o.getLocation())))
+                .orElse(lobbyCache.getOrDefault(Constants.DEFAULT, populateLobby(Constants.DEFAULT)));
     }
 }
