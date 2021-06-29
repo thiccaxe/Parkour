@@ -71,6 +71,22 @@ public class ParkourSession implements Serializable {
     }
 
     /**
+     * Reset the number of accumulated deaths.
+     */
+    public void resetDeaths() {
+        this.deaths = 0;
+    }
+
+    /**
+     * Reset the accumulated time and deaths.
+     */
+    public void resetProgress() {
+        resetTime();
+        resetDeaths();
+        this.currentCheckpoint = 0;
+    }
+
+    /**
      * Increase current Checkpoint.
      */
     public void increaseCheckpoint() {
@@ -107,6 +123,11 @@ public class ParkourSession implements Serializable {
 
     public int calculateSeconds() {
         return course.hasMaxTime() ? secondsAccumulated-- : secondsAccumulated++;
+    }
+
+    public int getRemainingDeaths() {
+        int remainingDeaths = getCourse().getMaxDeaths() - getDeaths();
+        return Math.max(remainingDeaths, 0);
     }
 
     /**

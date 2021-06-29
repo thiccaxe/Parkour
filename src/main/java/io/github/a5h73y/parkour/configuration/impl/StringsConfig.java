@@ -33,6 +33,7 @@ public class StringsConfig extends ParkourConfiguration {
 		this.addDefault("Parkour.Delete", "&b%VALUE% &fhas been deleted!");
 		this.addDefault("Parkour.DeleteCheckpoint", "Checkpoint &b%CHECKPOINT% &fwas deleted on &b%COURSE%");
 		this.addDefault("Parkour.Reset", "&b%VALUE% &fhas been reset!");
+		this.addDefault("Parkour.JoinBroadcast", "&3%PLAYER% &fjoined &b%COURSE%&f!");
 		this.addDefault("Parkour.FinishBroadcast", "&3%PLAYER% &ffinished &b%COURSE% &fwith &b%DEATHS% &fdeaths, in &b%TIME%&f!");
 		this.addDefault("Parkour.FinishCourse1", "Finished &b%VALUE%&f!");
 		this.addDefault("Parkour.FinishCourse2", "In &b%TIME%&f, dying &b%DEATHS% &ftimes");
@@ -63,7 +64,6 @@ public class StringsConfig extends ParkourConfiguration {
 		this.addDefault("Parkour.QuietOff", "Quiet Mode: &bOFF");
 		this.addDefault("Parkour.TestModeOn", "Test Mode: &bON&f. Simulating &b%VALUE%&f ParkourKit.");
 		this.addDefault("Parkour.TestModeOff", "Test Mode: &bOFF");
-		this.addDefault("Parkour.Challenge.Receive", "You have been challenged by &b%PLAYER% &fto course &b%COURSE%");
 		this.addDefault("Parkour.AlreadyCompleted", "You have already completed this course.");
 		this.addDefault("Parkour.Question", "Please enter &a/pa yes &fto confirm, or &c/pa no &fto cancel.");
 
@@ -129,6 +129,7 @@ public class StringsConfig extends ParkourConfiguration {
 		this.addDefault("Error.InvalidSession", "Your ParkourSession is invalid.");
 		this.addDefault("Error.ChallengeOnly", "This Course is limited to Challenges only.");
 		this.addDefault("Error.OnChallenge", "You are already in a Challenge.");
+		this.addDefault("Error.InvalidValue", "Please enter a valid value.");
 
 		this.addDefault("Help.Command", "&7/pa help &9%VALUE% &0: &7To learn more about the command.");
 		this.addDefault("Help.Commands", "To display the commands menu, enter &b/pa cmds");
@@ -140,10 +141,14 @@ public class StringsConfig extends ParkourConfiguration {
 		this.addDefault("Help.CommandUsage", "&3/pa &b%COMMAND%&e%ARGUMENTS% &0: &f%TITLE%");
 		this.addDefault("Help.SignUsage", "&b%COMMAND% &e%SHORTCUT% &0: &f%DESCRIPTION%");
 
-		this.addDefault("Other.Item.LastCheckpoint", "&7SHIFT + &6Right click to go back to last checkpoint");
-		this.addDefault("Other.Item.HideAll", "&7SHIFT + &6Right click to toggle visibility");
-		this.addDefault("Other.Item.Leave", "&7SHIFT + &6Right click to leave course");
-		this.addDefault("Other.Item.Restart", "&7SHIFT + &6Right click to restart course");
+		this.addDefault("ParkourTool.LastCheckpoint", "&7SHIFT + &6Right click to go back to last checkpoint");
+		this.addDefault("ParkourTool.HideAll", "&7SHIFT + &6Right click to toggle visibility");
+		this.addDefault("ParkourTool.HideAllEnabled", "&7SHIFT + &6Right click to toggle visibility");
+		this.addDefault("ParkourTool.Leave", "&7SHIFT + &6Right click to leave course");
+		this.addDefault("ParkourTool.Restart", "&7SHIFT + &6Right click to restart course");
+		this.addDefault("ParkourTool.Freedom", "&6Freedom Tool");
+		this.addDefault("ParkourTool.Rockets", "&6Rocket Launcher");
+
 		this.addDefault("Other.Kit", "&b%VALUE% &fParkourKit received!");
 		this.addDefault("Other.PropertySet", "The &3%PROPERTY% &ffor &3%COURSE% &fwas set to &b%VALUE%&f!");
 
@@ -160,6 +165,7 @@ public class StringsConfig extends ParkourConfiguration {
 		this.addDefault("Scoreboard.BestTimeEverNameTitle", "Best Player:");
 		this.addDefault("Scoreboard.MyBestTimeTitle", "My Best Time:");
 		this.addDefault("Scoreboard.CurrentDeathsTitle", "Current Deaths:");
+		this.addDefault("Scoreboard.RemainingDeathsTitle", "Remaining Deaths:");
 		this.addDefault("Scoreboard.CheckpointsTitle", "Checkpoints:");
 		this.addDefault("Scoreboard.LiveTimerTitle", "Current Time:");
 		this.addDefault("Scoreboard.TimeRemainingTitle", "Time Remaining:");
@@ -180,13 +186,11 @@ public class StringsConfig extends ParkourConfiguration {
 		this.addDefault("Kit.Bounce", "&bBounce Block");
 		this.addDefault("Kit.Repulse", "&bRepulse Block");
 
-		this.addDefault("Mode.Freedom.ItemName", "&6Freedom Tool");
 		this.addDefault("Mode.Freedom.JoinText", "&6Freedom Mode &f- Right click: &2Save&f, Left click: &5Load");
 		this.addDefault("Mode.Freedom.Save", "Position saved");
 		this.addDefault("Mode.Freedom.Load", "Position loaded");
-
 		this.addDefault("Mode.Rockets.JoinText", "Use the Rocket Launcher to launch yourself");
-		this.addDefault("Mode.Rockets.ItemName", "Rocket Launcher");
+		this.addDefault("Mode.Rockets.Reloading", "Reloading rocket...");
 
 		this.addDefault("PlaceholderAPI.InvalidSyntax", "Invalid syntax");
 		this.addDefault("PlaceholderAPI.NoTimeRecorded", "No time recorded");

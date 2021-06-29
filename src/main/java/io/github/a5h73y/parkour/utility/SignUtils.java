@@ -1,5 +1,7 @@
 package io.github.a5h73y.parkour.utility;
 
+import static io.github.a5h73y.parkour.other.ParkourConstants.ERROR_NO_EXIST;
+
 import io.github.a5h73y.parkour.Parkour;
 import io.github.a5h73y.parkour.type.course.CourseInfo;
 import io.github.a5h73y.parkour.type.lobby.LobbyInfo;
@@ -29,7 +31,7 @@ public class SignUtils {
         signEvent.setLine(1, signType);
         signEvent.setLine(2, "");
         signEvent.setLine(3, "-----");
-        TranslationUtils.sendValueTranslation("Parkour.SignCreated", signType);
+        TranslationUtils.sendValueTranslation("Parkour.SignCreated", signType, player);
     }
 
     /**
@@ -62,7 +64,7 @@ public class SignUtils {
         }
 
         if (!Parkour.getInstance().getCourseManager().doesCourseExists(signEvent.getLine(2))) {
-            TranslationUtils.sendValueTranslation("Error.NoExist", signEvent.getLine(2), player);
+            TranslationUtils.sendValueTranslation(ERROR_NO_EXIST, signEvent.getLine(2), player);
             breakSignAndCancelEvent(signEvent);
             return false;
         }
@@ -70,7 +72,7 @@ public class SignUtils {
         signEvent.setLine(1, signType);
 
         if (displayMessage) {
-            TranslationUtils.sendValueTranslation("Parkour.SignCreated", signType);
+            TranslationUtils.sendValueTranslation("Parkour.SignCreated", signType, player);
         }
         return true;
     }
@@ -93,7 +95,7 @@ public class SignUtils {
             signEvent.setLine(3, ChatColor.RED + String.valueOf(minimumLevel));
         }
 
-        TranslationUtils.sendValueTranslation("Parkour.SignCreated", "Join");
+        TranslationUtils.sendValueTranslation("Parkour.SignCreated", "Join", player);
     }
 
     /**
@@ -112,7 +114,7 @@ public class SignUtils {
 
         if (signEvent.getLine(2).isEmpty()) {
             signEvent.setLine(3, "");
-            TranslationUtils.sendValueTranslation("Parkour.SignCreated", "Lobby");
+            TranslationUtils.sendValueTranslation("Parkour.SignCreated", "Lobby", player);
 
         } else {
             String lobbyName = signEvent.getLine(2);
@@ -127,7 +129,7 @@ public class SignUtils {
             if (LobbyInfo.hasRequiredLevel(lobbyName)) {
                 signEvent.setLine(3, ChatColor.RED + LobbyInfo.getRequiredLevel(lobbyName).toString());
             }
-            TranslationUtils.sendValueTranslation("Parkour.SignCreated", "Lobby");
+            TranslationUtils.sendValueTranslation("Parkour.SignCreated", "Lobby", player);
         }
     }
 
@@ -148,14 +150,14 @@ public class SignUtils {
 
         if (signEvent.getLine(2).equalsIgnoreCase("heal")) {
             signEvent.setLine(2, "Heal");
-            TranslationUtils.sendValueTranslation("Parkour.SignCreated", "Heal Effect");
+            TranslationUtils.sendValueTranslation("Parkour.SignCreated", "Heal Effect", player);
 
         } else if (signEvent.getLine(2).equalsIgnoreCase("gamemode")) {
             signEvent.setLine(2, "GameMode");
 
             if (PluginUtils.doesGameModeExist(signEvent.getLine(3))) {
                 signEvent.setLine(3, signEvent.getLine(3).toUpperCase());
-                TranslationUtils.sendValueTranslation("Parkour.SignCreated", "GameMode Effect");
+                TranslationUtils.sendValueTranslation("Parkour.SignCreated", "GameMode Effect", player);
 
             } else {
                 signEvent.getBlock().breakNaturally();
@@ -198,7 +200,7 @@ public class SignUtils {
             signEvent.setLine(3, "");
         }
 
-        TranslationUtils.sendValueTranslation("Parkour.SignCreated", "Leaderboard");
+        TranslationUtils.sendValueTranslation("Parkour.SignCreated", "Leaderboard", player);
     }
 
     /**
@@ -218,7 +220,7 @@ public class SignUtils {
             return;
         }
 
-        TranslationUtils.sendValueTranslation("Parkour.SignCreated", "Checkpoint");
+        TranslationUtils.sendValueTranslation("Parkour.SignCreated", "Checkpoint", player);
     }
 
     /**

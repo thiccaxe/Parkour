@@ -1,13 +1,15 @@
 package io.github.a5h73y.parkour.type.lobby;
 
+import static io.github.a5h73y.parkour.other.ParkourConstants.DEFAULT;
+
 import io.github.a5h73y.parkour.Parkour;
 import io.github.a5h73y.parkour.other.AbstractPluginReceiver;
-import io.github.a5h73y.parkour.other.Constants;
 import io.github.a5h73y.parkour.other.ParkourValidation;
 import io.github.a5h73y.parkour.type.Cacheable;
 import io.github.a5h73y.parkour.type.course.CourseInfo;
 import io.github.a5h73y.parkour.type.player.ParkourSession;
 import io.github.a5h73y.parkour.type.player.PlayerInfo;
+import io.github.a5h73y.parkour.utility.PlayerUtils;
 import io.github.a5h73y.parkour.utility.PluginUtils;
 import io.github.a5h73y.parkour.utility.TranslationUtils;
 import io.github.a5h73y.parkour.utility.ValidationUtils;
@@ -59,7 +61,7 @@ public class LobbyManager extends AbstractPluginReceiver implements Cacheable<Lo
      * @param lobbyName lobby name
      */
     public void joinLobby(Player player, @Nullable String lobbyName) {
-        lobbyName = lobbyName == null ? Constants.DEFAULT : lobbyName.toLowerCase();
+        lobbyName = lobbyName == null ? DEFAULT : lobbyName.toLowerCase();
 
         if (!ParkourValidation.isDefaultLobbySet(player)) {
             return;
@@ -77,13 +79,36 @@ public class LobbyManager extends AbstractPluginReceiver implements Cacheable<Lo
         }
 
         Lobby lobby = lobbyCache.getOrDefault(lobbyName, populateLobby(lobbyName));
-        player.teleport(lobby.getLocation());
+        PlayerUtils.teleportToLocation(player, lobby.getLocation());
 
-        if (lobbyName.equals(Constants.DEFAULT)) {
+        if (LobbyInfo.hasLobbyCommand(lobbyName)) {
+            for (String command : LobbyInfo.getLobbyCommands(lobbyName)) {
+                PlayerUtils.dispatchServerPlayerCommand(command, player);
+            }
+        }
+
+        if (lobbyName.equals(DEFAULT)) {
             TranslationUtils.sendTranslation("Parkour.Lobby", player);
         } else {
             TranslationUtils.sendValueTranslation("Parkour.LobbyOther", lobbyName, player);
         }
+    }
+
+    /**
+     * Add a Command to be executed when the Player visits a Lobby.
+     *
+     * @param sender player
+     * @param lobbyName lobby name
+     * @param command command to run
+     */
+    public void addLobbyCommand(CommandSender sender, String lobbyName, String command) {
+        if (!LobbyInfo.doesLobbyExist(lobbyName)) {
+            TranslationUtils.sendValueTranslation("Error.UnknownLobby", lobbyName, sender);
+            return;
+        }
+
+        LobbyInfo.addLobbyCommand(lobbyName, command);
+        TranslationUtils.sendPropertySet(sender, "Lobby Command", lobbyName, "/" + command);
     }
 
     /**
@@ -96,8 +121,8 @@ public class LobbyManager extends AbstractPluginReceiver implements Cacheable<Lo
         if (!ParkourValidation.isDefaultLobbySet(player)) {
             return;
         }
-        Lobby lobby = lobbyCache.getOrDefault(Constants.DEFAULT, populateLobby(Constants.DEFAULT));
-        player.teleport(lobby.getLocation());
+        Lobby lobby = lobbyCache.getOrDefault(DEFAULT, populateLobby(DEFAULT));
+        PlayerUtils.teleportToLocation(player, lobby.getLocation());
         TranslationUtils.sendTranslation("Parkour.Lobby", player);
     }
 
@@ -108,8 +133,7 @@ public class LobbyManager extends AbstractPluginReceiver implements Cacheable<Lo
     public void teleportToNearestLobby(Player player) {
         Lobby lobby = getNearestLobby(player);
         if (lobby != null) {
-            player.setFallDistance(0);
-            player.teleport(lobby.getLocation());
+            PlayerUtils.teleportToLocation(player, lobby.getLocation());
             TranslationUtils.sendValueTranslation("Parkour.LobbyOther", lobby.getName(), player);
         }
     }
@@ -214,6 +238,6 @@ public class LobbyManager extends AbstractPluginReceiver implements Cacheable<Lo
                 .filter(lobby -> lobby.getLocation().getWorld() == player.getWorld())
                 .filter(lobby -> ParkourValidation.canJoinLobbySilent(player, lobby.getName()))
                 .min(Comparator.comparingDouble(o -> player.getLocation().distanceSquared(o.getLocation())))
-                .orElse(lobbyCache.getOrDefault(Constants.DEFAULT, populateLobby(Constants.DEFAULT)));
+                .orElse(lobbyCache.getOrDefault(DEFAULT, populateLobby(DEFAULT)));
     }
 }

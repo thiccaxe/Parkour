@@ -32,16 +32,16 @@ public class ParkourAutoTabCompleter extends AbstractPluginReceiver implements T
             "contact", "cmds", "version", "challenge");
 
     private static final List<String> ADMIN_ONLY_COMMANDS = Arrays.asList(
-            "setlobby", "reset", "economy", "recreate", "whitelist", "setlevel", "setplayer", "setrank", "settings",
-            "sql", "cache", "reload");
+            "setlobby", "setlobbycommand", "reset", "economy", "recreate", "whitelist", "setlevel", "setplayer",
+            "setrank", "settings", "sql", "cache", "reload", "placeholder", "config");
 
     private static final List<String> ADMIN_COURSE_COMMANDS = Arrays.asList(
             "checkpoint", "ready", "setstart", "setcourse", "setautostart", "select", "deselect", "done", "link", "linkkit",
             "addjoinitem", "rewardonce", "rewardlevel", "rewardleveladd", "rewardrank", "rewarddelay", "rewardparkoins",
-            "setmode", "createkit", "editkit", "validatekit", "setplayerlimit", "challengeonly");
+            "setmode", "createkit", "editkit", "validatekit", "setplayerlimit", "challengeonly", "resumable");
 
     private static final List<String> ON_COURSE_COMMANDS = Arrays.asList(
-            "back", "leave");
+            "back", "leave", "respawn", "restart");
 
     private static final List<String> QUESTION_ANSWER_COMMANDS = Arrays.asList(
             "yes", "no");
@@ -62,7 +62,7 @@ public class ParkourAutoTabCompleter extends AbstractPluginReceiver implements T
             "course", "lobby", "reset");
 
     private static final List<String> CACHE_COMMANDS = Arrays.asList(
-            "course", "lobby", "database", "parkourkit", "sound");
+            "course", "lobby", "database", "parkourkit", "sound", "clear");
 
     private static final List<String> COMMANDS_MENU = Arrays.asList(
             "1", "2", "3", "4", "signs");
@@ -214,6 +214,7 @@ public class ParkourAutoTabCompleter extends AbstractPluginReceiver implements T
                 allowedCommands = CHALLENGE_COMMANDS;
                 break;
             case "lobby":
+            case "setlobbycommand":
                 allowedCommands = new ArrayList<>(LobbyInfo.getAllLobbyNames());
                 break;
             case "join":
@@ -238,6 +239,7 @@ public class ParkourAutoTabCompleter extends AbstractPluginReceiver implements T
             case "stats":
             case "settings":
             case "challengeonly":
+            case "resumable":
                 allowedCommands = CourseInfo.getAllCourseNames();
                 break;
             case "test":

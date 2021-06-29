@@ -1,5 +1,6 @@
 package io.github.a5h73y.parkour.type.course;
 
+import static io.github.a5h73y.parkour.other.ParkourConstants.DEFAULT;
 import static io.github.a5h73y.parkour.utility.TranslationUtils.sendConditionalValue;
 import static io.github.a5h73y.parkour.utility.TranslationUtils.sendValue;
 
@@ -8,7 +9,6 @@ import io.github.a5h73y.parkour.configuration.ParkourConfiguration;
 import io.github.a5h73y.parkour.enums.ConfigType;
 import io.github.a5h73y.parkour.enums.ParkourEventType;
 import io.github.a5h73y.parkour.enums.ParkourMode;
-import io.github.a5h73y.parkour.other.Constants;
 import io.github.a5h73y.parkour.type.player.PlayerInfo;
 import io.github.a5h73y.parkour.utility.DateTimeUtils;
 import io.github.a5h73y.parkour.utility.MaterialUtils;
@@ -39,6 +39,36 @@ public class CourseInfo {
      */
     public static List<String> getAllCourseNames() {
         return getCourseConfig().getStringList("Courses");
+    }
+
+    /**
+     * Get the Course's display name.
+     * Fallback to the course name.
+     * @param courseName course name
+     * @return course display name
+     */
+    public static String getCourseDisplayName(@NotNull String courseName) {
+        return StringUtils.colour(
+                getCourseConfig().getString(courseName.toLowerCase() + ".DisplayName", courseName.toLowerCase()));
+    }
+
+    /**
+     * Check if the Course has a Display Name.
+     * @param courseName course name
+     * @return course has display name
+     */
+    public static boolean hasCourseDisplayName(@NotNull String courseName) {
+        return getCourseConfig().contains(courseName.toLowerCase() + ".DisplayName");
+    }
+
+    /**
+     * Set the Course's display name.
+     * @param courseName course name
+     * @param courseDisplayName course display name
+     */
+    public static void setCourseDisplayName(@NotNull String courseName, @NotNull String courseDisplayName) {
+        getCourseConfig().set(courseName.toLowerCase() + ".DisplayName", courseDisplayName);
+        persistChanges();
     }
 
     /**
@@ -211,7 +241,7 @@ public class CourseInfo {
      */
     @Nullable
     public static String getParkourKit(@NotNull String courseName) {
-        return getCourseConfig().getString(courseName.toLowerCase() + ".ParkourKit", Constants.DEFAULT);
+        return getCourseConfig().getString(courseName.toLowerCase() + ".ParkourKit", DEFAULT);
     }
 
     /**
@@ -416,6 +446,7 @@ public class CourseInfo {
      */
     public static void incrementViews(@NotNull String courseName) {
         getCourseConfig().set(courseName.toLowerCase() + ".Views", getViews(courseName) + 1);
+        persistChanges();
     }
 
     /**
@@ -606,7 +637,9 @@ public class CourseInfo {
                 if (displayName != null) {
                     itemMeta.setDisplayName(displayName);
                 }
-                itemMeta.setUnbreakable(unbreakable);
+                if (unbreakable) {
+                    itemMeta.setUnbreakable(true);
+                }
                 itemStack.setItemMeta(itemMeta);
                 joinItems.add(itemStack);
             }
@@ -697,13 +730,18 @@ public class CourseInfo {
 
         TranslationUtils.sendHeading(StringUtils.standardizeText(courseName) + " statistics", sender);
 
+        sendConditionalValue(sender, "Display Name", hasCourseDisplayName(courseName), getCourseDisplayName(courseName));
+
         sendValue(sender, "Views", getViews(courseName));
         sendValue(sender, "Completions", getCompletions(courseName)
                 + " (" + getCompletionPercent(courseName) + "%)");
         sendValue(sender, "Checkpoints", getCheckpointAmount(courseName));
         sendValue(sender, "Creator", getCreator(courseName));
         sendValue(sender, "Ready Status", String.valueOf(getReadyStatus(courseName)));
+        sendValue(sender, "Challenge Only", String.valueOf(getChallengeOnly(courseName)));
 
+        sendConditionalValue(sender, "Resumable", !Parkour.getDefaultConfig().isLeaveDestroyCourseProgress(),
+                String.valueOf(getResumable(courseName)));
         sendConditionalValue(sender, "Minimum ParkourLevel", getMinimumParkourLevel(courseName));
         sendConditionalValue(sender, "ParkourLevel Reward", getRewardParkourLevel(courseName));
         sendConditionalValue(sender, "ParkourLevel Reward Increase", getRewardParkourLevelIncrease(courseName));
@@ -738,7 +776,7 @@ public class CourseInfo {
         }
         for (ParkourEventType value : ParkourEventType.values()) {
             if (hasEventCommands(courseName, value)) {
-                TranslationUtils.sendMessage(sender, "&b" + value.getConfigEntry() + " Commands");
+                TranslationUtils.sendMessage(sender, "&3" + value.getConfigEntry() + " Commands", false);
                 getEventCommands(courseName, value).forEach(sender::sendMessage);
             }
         }
@@ -879,10 +917,29 @@ public class CourseInfo {
     /**
      * Set Player limit for Course.
      * @param courseName course name
-     * @param limit player limi
+     * @param limit player limit
      */
     public static void setPlayerLimit(@NotNull String courseName, int limit) {
         getCourseConfig().set(courseName.toLowerCase() + ".PlayerLimit", limit);
+        persistChanges();
+    }
+
+    /**
+     * Get Resumable flag for Course.
+     * @param courseName course name
+     * @return course resumable
+     */
+    public static boolean getResumable(String courseName) {
+        return getCourseConfig().getBoolean(courseName.toLowerCase() + ".Resumable", true);
+    }
+
+    /**
+     * Set the Resumable flag for Course.
+     * @param courseName course name
+     * @param value flag value
+     */
+    public static void setResumable(String courseName, boolean value) {
+        getCourseConfig().set(courseName.toLowerCase() + ".Resumable", value);
         persistChanges();
     }
 
@@ -946,5 +1003,9 @@ public class CourseInfo {
      */
     private static void persistChanges() {
         getCourseConfig().save();
+    }
+
+    private CourseInfo() {
+        throw new IllegalStateException("Utility class");
     }
 }

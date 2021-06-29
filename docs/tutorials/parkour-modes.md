@@ -3,9 +3,9 @@ Parkour Modes
 
 ## What is a ParkourMode?
 
-A Course can have a ParkourMode assigned to it, these allow the Courses to behave differently and add a new dynamic. Below I will list each ParkourMode and the difference they make once applied.
+A Course can have a ParkourMode assigned to it, these allow the Courses to behave differently and add a new dynamic. Below each ParkourMode is listed with the gameplay affects they make once applied.
 
-To set a ParkourMode to a Course, you start the conversation by entering `/pa setmode (course)`, which will talk you through the setup process of each option. Some ParkourModes require additional information to setup.
+To set a ParkourMode to a Course, you start the conversation by entering `/pa setmode (course)`, which will talk you through the setup process of each option. Some ParkourModes require additional information to set up.
 
 _If you want to remove a ParkourMode, you can set the mode back to "None"._
 
@@ -19,34 +19,44 @@ When you join a Freedom Course, it will display a message to explain how the too
 
 ![Freedom Information](https://i.imgur.com/JObldpv.png "Freedom Information")
 
-And it's as simple as that, right click with the tool to save your position, and left click to load it.
+It's as simple as that, right click with the tool to save your position, and left click to load it.
 
 ![Freedom Usage](https://i.imgur.com/TZ4p8UM.png "Freedom Usage")
 
 ## Potion
 
-This ParkourMode replaces the existing "Darkness", "Drunk" and "Jump" ParkourModes by allowing you to choose your own Potion Effects to apply the player once they join the Course.
+This ParkourMode replaces the existing "Darkness", "Drunk" and "Jump" ParkourModes by allowing you to choose your own Potion Effects to apply the Player once they join the Course.
 
-TODO images
+![Potion Conversation](https://i.imgur.com/zse9E0X.png "Potion Conversation")
+
+_All valid PotionEffectTypes can be [found here](https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/potion/PotionEffectType.html)._
+
+When requested, the Duration and Amplifier must be separated with a comma `,` for example `10000,1`.
+
+![Potion Applied](https://i.imgur.com/EhFL3Ku.png "Potion Applied")
 
 ## Speedy
 
-Simply sets the players movement speed to what is set in the config.yml. Allows you to run faster and jump further. Movement speed is reset to default once the player leaves.
-
-## Moon
-
-Straight forward, this applies Jump Boost to the player throughout the Course. If the player leaves the effect is removed. This will allow the player to reach new heights and simulate low gravity.
+Simply sets the Player's movement speed to what is set in the `config.yml`. Allows you to run faster and jump further. Movement speed is reset to default once the Player leaves.
 
 ## Dropper
 
-This allows you to integrate the plugin into the 'dropper' gamemode, allowing you to fall infinitely without dying or taking any fall damage. You can use DeathBlocks to allow the player to die if they hit a block.
+This allows you to integrate the plugin into the 'dropper' GameMode, allowing you to fall infinitely without dying or taking any fall damage. You can use DeathBlocks to allow the Player to die if they hit a block.
 
 ## Rockets
 
 Inspired by CodJumping, when you use an RPG's explosion to propel yourself into the air to gain additional height and velocity.
 
-You will be given a 'Rocket Launcher', which is a Rocket by default. Simply right click with the item in your hand and you will have a knockback applied to your player, which you can use to reach new heights and distances. The time between reuse can be configured, to reduce risk of it being abused.
+You will be given a 'Rocket Launcher', which is a Rocket by default. Simply right click with the item in your hand, and you will have a knock-back applied to your Player, which you can use to reach new heights and distances. The time between reuse can be configured, to reduce risk of it being abused.
 
+![Rocket Launcher Item](https://i.imgur.com/5xFkFHR.png "Rocket Launcher Item")
 
+![Rocket Launcher Use](https://i.imgur.com/i1f2Dmc.png "Rocket Launcher Use")
 
+## Free Checkpoint
 
+This ParkourMode allows you to treat any Pressure Plate as a checkpoint. Upon walking on a Pressure Plate the Player will be notified that a checkpoint has been set, if the Player dies they will be taken back to the last checkpoint they set. This allows you to create alternate routes through a Course.
+
+![Free Checkpoints](https://i.imgur.com/zYyvTD9.png "Free Checkpoints")
+
+You are also able to set manual checkpoints using "/pa manualcheckpoint" when "ParkourModes.FreeCheckpoint.ManualCheckpointCommandEnabled" is enabled.

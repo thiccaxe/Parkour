@@ -5,7 +5,7 @@ Compatible Plugins
 
 Parkour supports the ability to use Economy through the Vault plugin, created by Sleaker.
 
-The configuration option in the config.yml is "Other.Economy.Enabled" and must be set to true. When Parkour starts up, it will print a message whether it connected to the Vault plugin successfully.
+The configuration option in the `config.yml` is `Other.Economy.Enabled` and must be set to `true`. When Parkour starts up, it will print a message whether it has connected to the Vault plugin successfully.
 
 Once successfully linked, you are able to reward players with an amount of currency, as well as charge them for joining a Course.
 
@@ -13,53 +13,14 @@ If there are Courses that exist before the plugin was linked with Vault, these n
 
 Once the process is complete it will notify you how many Courses were updated. At this stage the economy.yml file should contain all the courses on your server, and a prize and fee set to 0.
 
-The joining fee and reward amount can be set in game, using `/pa econ setprize (course) (amount)` and `/pa econ setfee (course) (amount)`. Amount being the amount of currency to add / retract.
+The joining fee and reward amount can be set in game, using `/pa econ setprize (course) (amount)` and `/pa econ setfee (course) (amount)`. The amount is the amount of currency to add / charge.
 
 ## PlaceholderAPI
 
 PlaceholderAPI allows you to use Parkour values within other plugins.  
 _Please note that Parkour Expansion is no longer needed as it has been implemented within the Parkour plugin._
 
-### Parkour Placeholders
-
-Here are each of the available Placeholders that Parkour provides.
-
-```
-%parkour_global_version%
-%parkour_global_course_count%
-%parkour_global_player_count%
-%parkour_player_level%
-%parkour_player_rank%
-%parkour_player_parkoins%
-%parkour_player_last_completed%
-%parkour_player_last_joined%
-%parkour_player_courses_completed%
-%parkour_player_courses_uncompleted%
-%parkour_player_prize_delay_(course)%
-%parkour_player_personal_best_(course)_time%
-%parkour_player_personal_best_(course)_deaths%
-%parkour_course_record_player_(course)%
-%parkour_course_record_time_(course)%
-%parkour_course_record_deaths_(course)%
-%parkour_course_completed_(course)%
-%parkour_course_completions_(course)%
-%parkour_course_views_(course)%
-%parkour_current_course_name%
-%parkour_current_course_deaths%
-%parkour_current_course_timer%
-%parkour_current_course_checkpoints%
-%parkour_current_course_completed%
-%parkour_current_course_record_player%
-%parkour_current_course_record_time%
-%parkour_current_course_record_deaths%
-%parkour_current_course_personal_best_time%
-%parkour_current_course_personal_best_deaths%
-%parkour_current_checkpoint%
-%parkour_leaderboard_(course)_(position)_player%
-%parkour_leaderboard_(course)_(position)_time%
-%parkour_leaderboard_(course)_(position)_deaths%
-%parkour_topten_(course)_(position)%
-```
+[All of the Parkour Placeholders are available here](essential/placeholders.md).
 
 ## Holographic Displays
 
@@ -100,19 +61,6 @@ Add a line for each detail you want to display:
 `/hd addline Leader_tutorial {slow}Time: %parkour_leaderboard_tutorial_1_time%`  
 `/hd addline Leader_tutorial {slow}Deaths: %parkour_leaderboard_tutorial_1_deaths%`
 
-## BountifulAPI
-
-BountifulAPI supports the ability to display titles and various other notifications on older server versions, rather than printing the messages into the chat.
-
-_Spigot's implementation will be attempted first, then fallback to BountifulAPI if installed._
-
-![Bountiful Example 1](https://i.imgur.com/E8BighB.png "Bountiful Example 1")
-![Bountiful Example 2](https://i.imgur.com/fDsUmHV.png "Bountiful Example 2")
-![Bountiful Example 3](https://i.imgur.com/bRvhdp8.png "Bountiful Example 3")
-
-Created by connorlinfoot, available here: https://www.spigotmc.org/resources/bountifulapi-1-8-1-13.1394/
-
-
 ## Parkour Top Ten
 
 Allows for the player's Head to be proudly displayed next to their best times, great for a competitive Parkour server.
@@ -121,3 +69,39 @@ Allows for the player's Head to be proudly displayed next to their best times, g
 
 Plugin and image created by steve4744, available here: https://www.spigotmc.org/resources/parkour-top-ten.46268/
 
+
+## LeaderHeads
+
+Leaderheads is a plugin that allows you to create all-time, daily, weekly, and monthly leaderboards from placeholders that return a numeric value.
+
+When used with Parkour, course leaderboards can be created using placeholder `%parkour_player_personal_best_(course)_milliseconds%`
+
+### Creating a LeaderHeads Sign
+First place a sign, and then while looking at the sign, type:
+
+`/leaderheads setsign %parkour_player_personal_best_tutorial_milliseconds% 1 weekly`
+
+In this example the sign will update to show the number 1 ranked player on course 'tutorial' for the week with the time displayed as milliseconds.
+
+![LeaderHeads Example 1](https://i.imgur.com/LTJ9Dw3.png "LeaderHeads Example 1")
+
+In the file `statistics/parkour_player_personal_best_tutorial_milliseconds.yml`, set the statistic type to `time-milliseconds` and the order to `ascending`:
+
+```
+statistic-type: time-milliseconds
+order-mode: ascending
+```
+
+Reload LeaderHeads, and the sign will update to display a formatted time.
+
+![LeaderHeads Example 2](https://i.imgur.com/swbtPkt.png "LeaderHeads Example 2")
+
+The time format can be changed in LeaderHeads's `config.yml`, for example:
+
+`time-format: "{hours}:{minutes}:{seconds}"`
+
+![LeaderHeads Example 3](https://i.imgur.com/XzwLLSL.png "LeaderHeads Example 3")
+
+Currently, LeaderHeads does not appear to support displaying milliseconds as part of the formatted time on the sign.
+
+Plugin created by RobiRami, available here: https://www.spigotmc.org/resources/leaderheads.2079/

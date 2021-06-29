@@ -2,6 +2,7 @@ package io.github.a5h73y.parkour.conversation;
 
 import io.github.a5h73y.parkour.Parkour;
 import io.github.a5h73y.parkour.utility.TranslationUtils;
+import io.github.a5h73y.parkour.utility.ValidationUtils;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -20,7 +21,7 @@ import org.jetbrains.annotations.Nullable;
 public class SetPlayerConversation extends ParkourConversation {
 
     public static final List<String> SET_PLAYER_OPTIONS = Collections.unmodifiableList(
-            Arrays.asList("level", "rank"));
+            Arrays.asList("level", "leveladd", "rank"));
 
     public SetPlayerConversation(Player player) {
         super(player);
@@ -64,14 +65,13 @@ public class SetPlayerConversation extends ParkourConversation {
         public Prompt acceptInput(@NotNull ConversationContext context,
                                   @Nullable String input) {
 
-            String setOption = (String) context.getSessionData("setOption");
-
-            if (input == null || input.trim().isEmpty()) {
+            if (!ValidationUtils.isStringValid(input)) {
                 return null;
             }
 
             String playerName = (String) context.getSessionData(SESSION_PLAYER_NAME);
             String targetPlayerName = (String) context.getSessionData(SESSION_TARGET_PLAYER_NAME);
+            String setOption = (String) context.getSessionData("setOption");
             Player player = Bukkit.getPlayer(playerName);
             OfflinePlayer targetPlayer = Bukkit.getOfflinePlayer(targetPlayerName);
 
@@ -94,7 +94,11 @@ public class SetPlayerConversation extends ParkourConversation {
         Bukkit.getScheduler().runTaskAsynchronously(parkour, () -> {
             switch (setOption) {
                 case "level":
-                    parkour.getPlayerManager().setParkourLevel(sender, targetPlayer, input);
+                    parkour.getPlayerManager().setParkourLevel(sender, targetPlayer, input, false);
+                    break;
+
+                case "leveladd":
+                    parkour.getPlayerManager().setParkourLevel(sender, targetPlayer, input, true);
                     break;
 
                 case "rank":
@@ -102,8 +106,8 @@ public class SetPlayerConversation extends ParkourConversation {
                     break;
 
                 default:
-                    TranslationUtils.sendInvalidSyntax(sender, "setcourse",
-                            "(courseName) [creator, minlevel, maxdeath, maxtime] [value]");
+                    TranslationUtils.sendInvalidSyntax(sender, "setplayer",
+                            "(player) [level / leveladd / rank] [value]");
             }
         });
     }

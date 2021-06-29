@@ -1,5 +1,7 @@
 package io.github.a5h73y.parkour.other;
 
+import static io.github.a5h73y.parkour.other.ParkourConstants.ERROR_NO_EXIST;
+
 import io.github.a5h73y.parkour.Parkour;
 import io.github.a5h73y.parkour.enums.ConfigType;
 import io.github.a5h73y.parkour.enums.Permission;
@@ -36,11 +38,11 @@ public class ParkourValidation {
 
         if (!lobbySet) {
             if (PermissionUtils.hasPermission(player, Permission.ADMIN_ALL, false)) {
-                TranslationUtils.sendMessage(player, "&4Default Lobby has not been set!");
+                TranslationUtils.sendMessage(player, "&cDefault Lobby has not been set!");
                 TranslationUtils.sendMessage(player, "Type &b'/pa setlobby' &fwhere you want the lobby to be set.");
 
             } else {
-                TranslationUtils.sendMessage(player, "&4Default Lobby has not been set! Please tell the Owner!");
+                TranslationUtils.sendMessage(player, "&cDefault Lobby has not been set! Please tell the Owner!");
             }
         } else if (Bukkit.getWorld(Parkour.getDefaultConfig().getString("Lobby.default.World")) == null) {
             TranslationUtils.sendTranslation("Error.UnknownWorld", player);
@@ -123,13 +125,13 @@ public class ParkourValidation {
      * @return player can join course
      */
     public static boolean canJoinCourse(Player player, Course course) {
-        Parkour parkour = Parkour.getInstance();
-
         /* World doesn't exist */
         if (course.getCheckpoints().isEmpty()) {
             TranslationUtils.sendTranslation("Error.UnknownWorld", player);
             return false;
         }
+
+        Parkour parkour = Parkour.getInstance();
 
         /* Player in wrong world */
         if (parkour.getConfig().isJoinEnforceWorld()
@@ -143,7 +145,7 @@ public class ParkourValidation {
 
         if (minimumLevel > 0 && !PermissionUtils.hasPermission(player, Permission.ADMIN_LEVEL_BYPASS, false)
                 && !PermissionUtils.hasSpecificPermission(
-                player, Permission.PARKOUR_LEVEL, String.valueOf(minimumLevel), false)) {
+                        player, Permission.PARKOUR_LEVEL, String.valueOf(minimumLevel), false)) {
             int currentLevel = PlayerInfo.getParkourLevel(player);
 
             if (currentLevel < minimumLevel) {
@@ -268,12 +270,12 @@ public class ParkourValidation {
      * @return target player can join challenge
      */
     public static boolean canJoinChallenge(Player player, Player targetPlayer, Challenge challenge) {
-        Parkour parkour = Parkour.getInstance();
-
         if (!canJoinCourseSilent(targetPlayer, challenge.getCourseName())) {
             TranslationUtils.sendMessage(player, "Player is not able to join this Course!");
             return false;
         }
+
+        Parkour parkour = Parkour.getInstance();
 
         if (challenge.getWager() != null
                 && !parkour.getEconomyApi().hasAmount(targetPlayer, challenge.getWager())) {
@@ -303,7 +305,12 @@ public class ParkourValidation {
             return false;
 
         } else if (courseName.contains(".")) {
-            TranslationUtils.sendMessage(player, "Course name can not contain '.'!");
+            TranslationUtils.sendMessage(player, "Course name can not contain &4.&f!");
+            return false;
+
+        } else if (courseName.contains("_")) {
+            TranslationUtils.sendMessage(player,
+                    "Course name can not contain &4_&f as it will break Placeholders. Instead, set a Course Display name.");
             return false;
 
         } else if (ValidationUtils.isInteger(courseName)) {
@@ -329,7 +336,7 @@ public class ParkourValidation {
         String selected = PlayerInfo.getSelectedCourse(player).toLowerCase();
 
         if (!Parkour.getInstance().getCourseManager().doesCourseExists(selected)) {
-            TranslationUtils.sendValueTranslation("Error.NoExist", selected, player);
+            TranslationUtils.sendValueTranslation(ERROR_NO_EXIST, selected, player);
             return false;
         }
 
@@ -364,15 +371,15 @@ public class ParkourValidation {
      * @return player can create challenge
      */
     public static boolean canCreateChallenge(Player player, String courseNameInput, String wager) {
-        String courseName = courseNameInput.toLowerCase();
-        Parkour parkour = Parkour.getInstance();
-
         if (!PermissionUtils.hasPermission(player, Permission.BASIC_CHALLENGE)) {
             return false;
         }
 
+        String courseName = courseNameInput.toLowerCase();
+        Parkour parkour = Parkour.getInstance();
+
         if (!parkour.getCourseManager().doesCourseExists(courseName)) {
-            TranslationUtils.sendValueTranslation("Error.NoExist", courseName, player);
+            TranslationUtils.sendValueTranslation(ERROR_NO_EXIST, courseName, player);
             return false;
         }
 
@@ -386,7 +393,7 @@ public class ParkourValidation {
             return false;
         }
 
-        if (!parkour.getPlayerManager().delayPlayer(player, 10, true)) {
+        if (!parkour.getPlayerManager().delayPlayerWithMessage(player, 8)) {
             return false;
         }
 
@@ -447,7 +454,7 @@ public class ParkourValidation {
      */
     public static boolean canDeleteCourse(CommandSender sender, String courseName) {
         if (!Parkour.getInstance().getCourseManager().doesCourseExists(courseName)) {
-            TranslationUtils.sendValueTranslation("Error.NoExist", courseName, sender);
+            TranslationUtils.sendValueTranslation(ERROR_NO_EXIST, courseName, sender);
             return false;
         }
 
@@ -479,7 +486,7 @@ public class ParkourValidation {
      */
     public static boolean canDeleteCheckpoint(CommandSender sender, String courseName) {
         if (!Parkour.getInstance().getCourseManager().doesCourseExists(courseName)) {
-            TranslationUtils.sendValueTranslation("Error.NoExist", courseName, sender);
+            TranslationUtils.sendValueTranslation(ERROR_NO_EXIST, courseName, sender);
             return false;
         }
 

@@ -1,9 +1,11 @@
 Sign Commands
 ======
 
+**If Parkour signs aren't working for non-ops, this will be because of an external reason. This could include the server.properties spawn-protection or a 3rd party plugin, and not because of the Parkour plugin.**
+
 ## Join Course
 
-A sign used to join a Parkour Course. These should be stored in your Parkour Lobby so they can be easy to find and interact with. Validation will execute when the sign is clicked to make sure the player is allowed to join first before they are teleported away.
+A sign used to join a Parkour Course. These should be stored in your Parkour Lobby, so they can be easy to find and interact with. Validation will execute when the sign is clicked to make sure the Player is allowed to join first before they are teleported away.
 
 ##### Syntax
 
@@ -21,7 +23,7 @@ If the Course has a minimum level requirement to join, the level number will be 
 
 ## Finish Course
 
-A Finish sign is used as an alternative to a Finish Block. Validation will execute when the sign is clicked to make sure the player is allowed to finish the Course before they are teleported away.
+A Finish sign is used as an alternative to a Finish Block. Validation will execute when the sign is clicked to make sure the Player is allowed to finish the Course before they are teleported away.
 
 ##### Syntax
 
@@ -45,7 +47,7 @@ A Parkour lobby is an area of Parkour Join signs, which you are teleported to wh
 
 ##### Additional information
 
-If no lobby name is specified the default lobby will be used.
+If a lobby name is not specified the default lobby will be used.
 
 If the lobby has a minimum level requirement to join, the level number will be displayed underneath.
 
@@ -53,22 +55,22 @@ If the lobby has a minimum level requirement to join, the level number will be d
 
 ## Leave Course
 
-Create a sign for players to easily leave the Course.
+Create a sign for Players to easily leave the Course.
 
 ##### Example
 
 ![Leave Example](https://i.imgur.com/Zgnyw6w.png "Leave Example")
 
-## Effects Signs
+## Effect Signs
 
-You can apply several effects to the player on the Course. These are activated by right clicking the signs whilst on a course.
+You can apply several effects to the Player on the Course. These are activated by right clicking the signs whilst on a Course.
 
 The effects are derived from PotionEffectType available from the server.
 
 There are 2 hardcoded effects, these include:
 
     Heal
-        Fully restore the player's health.
+        Fully restore the Player's health.
     Gamemode
         Requires a GameMode on the bottom line to apply the GameMode specified.
 
@@ -86,7 +88,7 @@ For resistance effects that may not fit on the line such as `DAMAGE_RESISTANCE` 
 
 ## Course Stats
 
-Display the Course information in the player's chat when they right click the sign.
+Display the Course information in the Player's chat when they right click the sign.
 
 ##### Syntax
 
@@ -98,7 +100,7 @@ Display the Course information in the player's chat when they right click the si
 
 ##### Additional information
 
-Each Course will display the relevant statistics based on how they are set up. Each course would have a dynamic list of information based on how they are setup. For example if the course has a custom lobby set, that would display also.
+Each Course will display the relevant statistics based on how they are set up. Each Course would have a dynamic list of information based on how they are set up. For example if the Course has a custom lobby set, that would display also.
 
 ![Stats Results](https://i.imgur.com/C1pBaJA.png "Stats Results")
 
@@ -132,8 +134,11 @@ These work the same way as previous "SetPoint" signs, they simply load the check
 
 ## Join All
 
-Present a GUI with all the available Courses to join. Permission "Parkour.Basic.JoinAll" is required for the Player to use.
+Present a GUI with all the available Courses to join, simply clicking an entry will trigger the Player to join a Course.  
+The layout can be customised from the config, with the ability to navigate through the courses on different pages.
+
+Permission `Parkour.Basic.JoinAll` is required for the Player to use.
 
 ##### Example
 
-![JoinAll Example](https://i.imgur.com/TODO.png "JoinAll Example")
+![JoinAll Example](https://i.imgur.com/LAoFM3s.png "JoinAll Example")

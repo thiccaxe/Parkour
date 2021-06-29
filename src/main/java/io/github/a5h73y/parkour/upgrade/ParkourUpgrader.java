@@ -1,6 +1,5 @@
 package io.github.a5h73y.parkour.upgrade;
 
-import com.g00fy2.versioncompare.Version;
 import io.github.a5h73y.parkour.Parkour;
 import io.github.a5h73y.parkour.other.AbstractPluginReceiver;
 import io.github.a5h73y.parkour.other.Backup;
@@ -10,14 +9,14 @@ import io.github.a5h73y.parkour.upgrade.major.DefaultConfigUpgradeTask;
 import io.github.a5h73y.parkour.upgrade.major.PlayerInfoUpgradeTask;
 import io.github.a5h73y.parkour.upgrade.major.StringsConfigUpgradeTask;
 import io.github.a5h73y.parkour.upgrade.minor.PartialUpgradeTask;
+import io.github.g00fy2.versioncompare.Version;
 import java.io.File;
 import java.io.IOException;
-import java.util.function.BooleanSupplier;
 import java.util.logging.Logger;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-public class ParkourUpgrader extends AbstractPluginReceiver implements BooleanSupplier {
+public class ParkourUpgrader extends AbstractPluginReceiver {
 
 	private final File defaultFile;
 	private final File playerFile;
@@ -55,8 +54,11 @@ public class ParkourUpgrader extends AbstractPluginReceiver implements BooleanSu
 		stringsConfig = YamlConfiguration.loadConfiguration(stringsFile);
 	}
 
-	@Override
-	public boolean getAsBoolean() {
+	/**
+	 * Begin the Parkour upgrade process.
+	 * @return upgrade success
+	 */
+	public boolean beginUpgrade() {
 		parkour.getLogger().info("=== Beginning Parkour Upgrade ===");
 		parkour.getLogger().info(String.format("Upgrading from v%s to v%s",
 				defaultConfig.getString("Version"), parkour.getDescription().getVersion()));
@@ -64,11 +66,12 @@ public class ParkourUpgrader extends AbstractPluginReceiver implements BooleanSu
 		parkour.getLogger().info("Creating backup of current install...");
 		Backup.backupNow(true);
 
-		boolean success = true;
+		boolean success;
 		Version existingVersion = new Version(defaultConfig.getString("Version"));
 
 		if (existingVersion.isLowerThan("5.0")) {
 			parkour.getLogger().warning("This version is too outdated.");
+			parkour.getLogger().warning("Please upgrade to 4.8 and then reinstall this version.");
 			success = false;
 
 		} else if (existingVersion.isLowerThan("6.0")) {

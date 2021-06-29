@@ -1,16 +1,19 @@
 package io.github.a5h73y.parkour.commands;
 
-import static io.github.a5h73y.parkour.other.Constants.DEFAULT;
+import static io.github.a5h73y.parkour.other.ParkourConstants.DEFAULT;
 
 import io.github.a5h73y.parkour.Parkour;
 import io.github.a5h73y.parkour.conversation.CoursePrizeConversation;
 import io.github.a5h73y.parkour.conversation.CreateParkourKitConversation;
 import io.github.a5h73y.parkour.conversation.EditParkourKitConversation;
 import io.github.a5h73y.parkour.conversation.ParkourModeConversation;
+import io.github.a5h73y.parkour.enums.Permission;
 import io.github.a5h73y.parkour.other.AbstractPluginReceiver;
 import io.github.a5h73y.parkour.other.Backup;
 import io.github.a5h73y.parkour.type.course.CourseInfo;
+import io.github.a5h73y.parkour.utility.PermissionUtils;
 import io.github.a5h73y.parkour.utility.PluginUtils;
+import io.github.a5h73y.parkour.utility.StringUtils;
 import io.github.a5h73y.parkour.utility.TranslationUtils;
 import io.github.a5h73y.parkour.utility.ValidationUtils;
 import org.bukkit.Bukkit;
@@ -58,6 +61,14 @@ public class ParkourConsoleCommands extends AbstractPluginReceiver implements Co
 
             case "cache":
                 PluginUtils.cacheCommand(sender, args.length == 2 ? args[1] : null);
+                break;
+
+            case "challengeonly":
+                if (!ValidationUtils.validateArgs(sender, args, 2)) {
+                    return false;
+                }
+
+                parkour.getCourseManager().toggleChallengeOnlyStatus(sender, args[1]);
                 break;
 
             case "cmds":
@@ -152,6 +163,7 @@ public class ParkourConsoleCommands extends AbstractPluginReceiver implements Co
                 break;
 
             case "prize":
+            case "setprize":
                 if (!ValidationUtils.validateArgs(sender, args, 2)) {
                     return false;
                 }
@@ -160,7 +172,7 @@ public class ParkourConsoleCommands extends AbstractPluginReceiver implements Co
                 break;
 
             case "recreate":
-                parkour.getDatabase().recreateAllCourses();
+                parkour.getDatabase().recreateAllCourses(true);
                 break;
 
             case "reload":
@@ -201,6 +213,14 @@ public class ParkourConsoleCommands extends AbstractPluginReceiver implements Co
                 parkour.getPlayerManager().restartCourse(findPlayer(sender, args[1]));
                 break;
 
+            case "resumable":
+                if (!ValidationUtils.validateArgs(sender, args, 2)) {
+                    return false;
+                }
+
+                parkour.getCourseManager().toggleResumable(sender, args[1]);
+                break;
+
             case "rewarddelay":
                 if (!ValidationUtils.validateArgs(sender, args, 3)) {
                     return false;
@@ -230,15 +250,7 @@ public class ParkourConsoleCommands extends AbstractPluginReceiver implements Co
                     return false;
                 }
 
-                parkour.getCourseManager().setRewardOnceStatus(sender, args[1]);
-                break;
-
-            case "challengeonly":
-                if (!ValidationUtils.validateArgs(sender, args, 2)) {
-                    return false;
-                }
-
-                parkour.getCourseManager().setChallengeOnlyStatus(sender, args[1]);
+                parkour.getCourseManager().toggleRewardOnceStatus(sender, args[1]);
                 break;
 
             case "rewardparkoins":
@@ -263,6 +275,14 @@ public class ParkourConsoleCommands extends AbstractPluginReceiver implements Co
                 }
 
                 parkour.getCourseManager().processSetCommand(sender, args);
+                break;
+
+            case "setlobbycommand":
+                if (!ValidationUtils.validateArgs(sender, args, 3, 100)) {
+                    return false;
+                }
+
+                parkour.getLobbyManager().addLobbyCommand(sender, args[1], StringUtils.extractMessageFromArgs(args, 2));
                 break;
 
             case "setmode":

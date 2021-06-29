@@ -30,21 +30,13 @@ public class DefaultConfig extends ParkourConfiguration {
 		this.addDefault("OnJoin.AllowViaCommand", true);
 		this.addDefault("OnJoin.EnforceWorld", false);
 		this.addDefault("OnJoin.EnforceReady", true);
-		this.addDefault("OnJoin.FillHealth", true);
-		this.addDefault("OnJoin.Item.LastCheckpoint.Material", "ARROW");
-		this.addDefault("OnJoin.Item.LastCheckpoint.Slot", 0);
-		this.addDefault("OnJoin.Item.HideAll.Material", "BONE");
-		this.addDefault("OnJoin.Item.HideAll.Slot", 1);
-		this.addDefault("OnJoin.Item.HideAll.Global", true);
-		this.addDefault("OnJoin.Item.HideAllEnabled.Material", "BONE");
-		this.addDefault("OnJoin.Item.Leave.Material", XMaterial.OAK_SAPLING.parseMaterial().name());
-		this.addDefault("OnJoin.Item.Leave.Slot", 2);
-		this.addDefault("OnJoin.Item.Restart.Material", "STICK");
-		this.addDefault("OnJoin.Item.Restart.Slot", 3);
+		this.addDefault("OnJoin.FillHealth.Enabled", true);
+		this.addDefault("OnJoin.FillHealth.Amount", 20);
 		this.addDefault("OnJoin.SetGameMode", "SURVIVAL");
 		this.addDefault("OnJoin.TreatFirstCheckpointAsStart", false);
 		this.addDefault("OnJoin.PerCoursePermission", false);
 		this.addDefault("OnJoin.TeleportPlayer", true);
+		this.addDefault("OnJoin.BroadcastLevel", "NONE");
 
 		this.addDefault("OnCourse.AnybodyPlaceBreakBlocks", false);
 		this.addDefault("OnCourse.AdminPlaceBreakBlocks", true);
@@ -65,6 +57,7 @@ public class DefaultConfig extends ParkourConfiguration {
 		this.addDefault("OnCourse.PreventPlateStick", false);
 		this.addDefault("OnCourse.PreventOpeningOtherInventories", false);
 		this.addDefault("OnCourse.PreventAttackingEntities", false);
+		this.addDefault("OnCourse.PreventEntitiesAttacking", true);
 		this.addDefault("OnCourse.PreventJoiningDifferentCourse", false);
 		this.addDefault("OnCourse.PreventPlayerCollisions", false);
 		this.addDefault("OnCourse.SneakToInteractItems", true);
@@ -77,6 +70,7 @@ public class DefaultConfig extends ParkourConfiguration {
 		this.addDefault("OnFinish.DefaultPrize.Material", "DIAMOND");
 		this.addDefault("OnFinish.DefaultPrize.Amount", 1);
 		this.addDefault("OnFinish.DefaultPrize.XP", 0);
+		this.addDefault("OnFinish.DefaultPrize.Command", "");
 		this.addDefault("OnFinish.DisplayNewRecords", false);
 		this.addDefault("OnFinish.DisplayStats", true);
 		this.addDefault("OnFinish.EnablePrizes", true);
@@ -93,11 +87,31 @@ public class DefaultConfig extends ParkourConfiguration {
 		this.addDefault("OnLeave.DestroyCourseProgress", true);
 		this.addDefault("OnLeave.TeleportAway", true);
 
-		this.addDefault("OnDie.ResetTimeWithNoCheckpoint", false);
+		this.addDefault("OnRestart.FullPlayerRestart", true);
+
+		this.addDefault("OnDie.ResetProgressWithNoCheckpoint", false);
 		this.addDefault("OnDie.SetXPBarToDeathCount", false);
 
 		this.addDefault("OnLeaveServer.LeaveCourse", false);
 		this.addDefault("OnLeaveServer.TeleportToLastCheckpoint", false);
+
+		this.addDefault("ParkourTool.LastCheckpoint.Material", "ARROW");
+		this.addDefault("ParkourTool.LastCheckpoint.Slot", 0);
+		this.addDefault("ParkourTool.HideAll.Material", "BONE");
+		this.addDefault("ParkourTool.HideAll.Slot", 1);
+		this.addDefault("ParkourTool.HideAll.Global", true);
+		this.addDefault("ParkourTool.HideAll.ActivateOnJoin", false);
+		this.addDefault("ParkourTool.HideAllEnabled.Material", "BONE");
+		this.addDefault("ParkourTool.HideAllEnabled.Slot", 1);
+		this.addDefault("ParkourTool.Leave.Material", XMaterial.OAK_SAPLING.parseMaterial().name());
+		this.addDefault("ParkourTool.Leave.Slot", 2);
+		this.addDefault("ParkourTool.Restart.Material", "STICK");
+		this.addDefault("ParkourTool.Restart.Slot", 3);
+		this.addDefault("ParkourTool.Restart.SecondCooldown", 2);
+		this.addDefault("ParkourTool.Freedom.Material", XMaterial.REDSTONE_TORCH.parseMaterial().name());
+		this.addDefault("ParkourTool.Freedom.Slot", 4);
+		this.addDefault("ParkourTool.Rockets.Material", XMaterial.FIREWORK_ROCKET.parseMaterial().name());
+		this.addDefault("ParkourTool.Rockets.Slot", 4);
 
 		this.addDefault("ParkourChallenge.HidePlayers", true);
 		this.addDefault("ParkourChallenge.CountdownFrom", 5);
@@ -108,6 +122,7 @@ public class DefaultConfig extends ParkourConfiguration {
 		this.addDefault("ParkourModes.Dropper.FallDamage", false);
 		this.addDefault("ParkourModes.Rockets.Invert", false);
 		this.addDefault("ParkourModes.Rockets.Delay", 1);
+		this.addDefault("ParkourModes.FreeCheckpoint.ManualCheckpointCommandEnabled", false);
 
 		this.addDefault("DisplayTitle.FadeIn", 5);
 		this.addDefault("DisplayTitle.Stay", 20);
@@ -139,8 +154,14 @@ public class DefaultConfig extends ParkourConfiguration {
 		this.addDefault("Scoreboard.Checkpoints.Sequence", 6);
 		this.addDefault("Scoreboard.LiveTimer.Enabled", true);
 		this.addDefault("Scoreboard.LiveTimer.Sequence", 7);
+		this.addDefault("Scoreboard.RemainingDeaths.Enabled", false);
+		this.addDefault("Scoreboard.RemainingDeaths.Sequence", 8);
 
 		this.addDefault("Sounds.Enabled", true);
+		this.addDefault("Sounds.JoinCourse.Enabled", false);
+		this.addDefault("Sounds.JoinCourse.Sound", "BLOCK_NOTE_BLOCK_PLING");
+		this.addDefault("Sounds.JoinCourse.Volume", 0.05f);
+		this.addDefault("Sounds.JoinCourse.Pitch", 1.75f);
 		this.addDefault("Sounds.SecondIncrement.Enabled", true);
 		this.addDefault("Sounds.SecondIncrement.Sound", "BLOCK_NOTE_BLOCK_PLING");
 		this.addDefault("Sounds.SecondIncrement.Volume", 0.05f);
@@ -182,6 +203,7 @@ public class DefaultConfig extends ParkourConfiguration {
 		this.addDefault("Other.Parkour.InventoryManagement", true);
 		this.addDefault("Other.Parkour.SignUsePermissions", false);
 		this.addDefault("Other.Parkour.CommandUsePermissions", false);
+		this.addDefault("Other.Parkour.MaximumParkourLevel", 99999999);
 		this.addDefault("Other.Display.JoinWelcomeMessage", true);
 		this.addDefault("Other.Display.LevelReward", true);
 		this.addDefault("Other.Display.ShowMilliseconds", false);
@@ -192,7 +214,6 @@ public class DefaultConfig extends ParkourConfiguration {
 		this.addDefault("Other.OnSetPlayerParkourLevel.UpdateParkourRank", true);
 		this.addDefault("Other.OnVoid.TeleportToLobby", false);
 
-		this.addDefault("Plugin.BountifulAPI.Enabled", true);
 		this.addDefault("Plugin.Vault.Enabled", true);
 		this.addDefault("Plugin.PlaceholderAPI.Enabled", true);
 		this.addDefault("Plugin.PlaceholderAPI.CacheTime", 15);
@@ -239,6 +260,10 @@ public class DefaultConfig extends ParkourConfiguration {
 
 	public String getStrippedSignHeader() {
 		return ChatColor.stripColor(getSignHeader());
+	}
+
+	public String getDefaultPrizeCommand() {
+		return this.getString("OnFinish.DefaultPrize.Command");
 	}
 
 	public boolean isPermissionsForCommands() {
@@ -301,6 +326,10 @@ public class DefaultConfig extends ParkourConfiguration {
 		return this.getBoolean("OnCourse.PreventAttackingEntities");
 	}
 
+	public boolean isPreventEntitiesAttacking() {
+		return this.getBoolean("OnCourse.PreventEntitiesAttacking");
+	}
+
 	public boolean isPreventPlayerCollisions() {
 		return this.getBoolean("OnCourse.PreventPlayerCollisions");
 	}
@@ -349,25 +378,29 @@ public class DefaultConfig extends ParkourConfiguration {
 		return this.getBoolean("Other.OnVoid.TeleportToLobby");
 	}
 
+	public boolean isLeaveDestroyCourseProgress() {
+		return this.getBoolean("OnLeave.DestroyCourseProgress");
+	}
+
 	/* Materials */
 	public Material getLastCheckpointTool() {
-		return getMaterialOrDefault("OnJoin.Item.LastCheckpoint.Material", Material.AIR);
+		return getMaterialOrDefault("ParkourTool.LastCheckpoint.Material", Material.AIR);
 	}
 
 	public Material getHideAllDisabledTool() {
-		return getMaterialOrDefault("OnJoin.Item.HideAll.Material", Material.AIR);
+		return getMaterialOrDefault("ParkourTool.HideAll.Material", Material.AIR);
 	}
 
 	public Material getHideAllEnabledTool() {
-		return getMaterialOrDefault("OnJoin.Item.HideAllEnabled.Material", Material.AIR);
+		return getMaterialOrDefault("ParkourTool.HideAllEnabled.Material", Material.AIR);
 	}
 
 	public Material getLeaveTool() {
-		return getMaterialOrDefault("OnJoin.Item.Leave.Material", Material.AIR);
+		return getMaterialOrDefault("ParkourTool.Leave.Material", Material.AIR);
 	}
 
 	public Material getRestartTool() {
-		return getMaterialOrDefault("OnJoin.Item.Restart.Material", Material.AIR);
+		return getMaterialOrDefault("ParkourTool.Restart.Material", Material.AIR);
 	}
 
 	public Material getAutoStartMaterial() {

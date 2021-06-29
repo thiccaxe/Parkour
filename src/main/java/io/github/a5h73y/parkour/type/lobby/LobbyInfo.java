@@ -2,7 +2,9 @@ package io.github.a5h73y.parkour.type.lobby;
 
 import io.github.a5h73y.parkour.Parkour;
 import io.github.a5h73y.parkour.configuration.impl.DefaultConfig;
-import io.github.a5h73y.parkour.other.Constants;
+import io.github.a5h73y.parkour.other.ParkourConstants;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -19,7 +21,9 @@ public class LobbyInfo {
 	 * @return lobby names
 	 */
 	public static Set<String> getAllLobbyNames() {
-		return Parkour.getDefaultConfig().getConfigurationSection("Lobby").getKeys(false);
+		return Parkour.getDefaultConfig().isConfigurationSection("Lobby")
+					? Parkour.getDefaultConfig().getConfigurationSection("Lobby").getKeys(false)
+					: Collections.emptySet();
 	}
 
 	/**
@@ -27,7 +31,7 @@ public class LobbyInfo {
 	 * @return default parkour kit exists
 	 */
 	public static boolean doesLobbyExist() {
-		return doesLobbyExist(Constants.DEFAULT);
+		return doesLobbyExist(ParkourConstants.DEFAULT);
 	}
 
 	/**
@@ -119,5 +123,40 @@ public class LobbyInfo {
 	public static void setRequiredLevel(String lobbyName, Integer requiredLevel) {
 		Parkour.getDefaultConfig().set("Lobby." + lobbyName.toLowerCase() + ".RequiredLevel", requiredLevel);
 		Parkour.getDefaultConfig().save();
+	}
+
+	/**
+	 * Get a List of Commands for the Lobby.
+	 * @param lobbyName lobby
+	 * @return commands
+	 */
+	public static List<String> getLobbyCommands(String lobbyName) {
+		return Parkour.getDefaultConfig().getStringList("Lobby." + lobbyName + ".Commands");
+	}
+
+	/**
+	 * Check if the Lobby has Commands set.
+	 * @param lobbyName lobby
+	 * @return lobby has commands
+	 */
+	public static boolean hasLobbyCommand(String lobbyName) {
+		return Parkour.getDefaultConfig().contains("Lobby." + lobbyName + ".Commands");
+	}
+
+	/**
+	 * Add a Command to the specified Lobby.
+	 * @param lobbyName lobby
+	 * @param command command
+	 */
+	public static void addLobbyCommand(String lobbyName, String command) {
+		List<String> commands = getLobbyCommands(lobbyName);
+		commands.add(command);
+
+		Parkour.getDefaultConfig().set("Lobby." + lobbyName + ".Commands", commands);
+		Parkour.getDefaultConfig().save();
+	}
+
+	private LobbyInfo() {
+		throw new IllegalStateException("Utility class");
 	}
 }

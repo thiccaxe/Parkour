@@ -2,7 +2,7 @@ package io.github.a5h73y.parkour.database;
 
 import io.github.a5h73y.parkour.Parkour;
 import io.github.a5h73y.parkour.other.AbstractPluginReceiver;
-import io.github.a5h73y.parkour.other.Constants;
+import io.github.a5h73y.parkour.other.ParkourConstants;
 import io.github.a5h73y.parkour.type.Cacheable;
 import io.github.a5h73y.parkour.type.course.CourseInfo;
 import io.github.a5h73y.parkour.utility.DateTimeUtils;
@@ -107,8 +107,8 @@ public class ParkourDatabase extends AbstractPluginReceiver implements Cacheable
             return times;
         }
 
-        String courseResultsQuery = "SELECT * FROM time"
-                + " WHERE courseId=" + courseId + " ORDER BY time LIMIT " + maxEntries;
+        String courseResultsQuery = "SELECT * FROM time WHERE courseId=" + courseId
+                + " ORDER BY time LIMIT " + maxEntries;
 
         try (ResultSet rs = database.query(courseResultsQuery)) {
             times = processTimes(rs);
@@ -139,8 +139,8 @@ public class ParkourDatabase extends AbstractPluginReceiver implements Cacheable
             return times;
         }
 
-        String playerResultsQuery = "SELECT * FROM time"
-                + " WHERE courseId=" + courseId + " AND playerId='" + getPlayerId(player) + "' ORDER BY time LIMIT " + maxEntries;
+        String playerResultsQuery = "SELECT * FROM time WHERE courseId=" + courseId
+                + " AND playerId='" + getPlayerId(player) + "' ORDER BY time LIMIT " + maxEntries;
 
         try (ResultSet rs = database.query(playerResultsQuery)) {
             times = processTimes(rs);
@@ -167,8 +167,8 @@ public class ParkourDatabase extends AbstractPluginReceiver implements Cacheable
             return timeExists;
         }
 
-        String timeExistsQuery = "SELECT 1 FROM time"
-                + " WHERE courseId=" + courseId + " AND playerId='" + getPlayerId(player) + "' LIMIT 1;";
+        String timeExistsQuery = "SELECT 1 FROM time WHERE courseId=" + courseId
+                + " AND playerId='" + getPlayerId(player) + "' LIMIT 1;";
 
         try (ResultSet rs = database.query(timeExistsQuery)) {
             timeExists = rs.next();
@@ -195,8 +195,7 @@ public class ParkourDatabase extends AbstractPluginReceiver implements Cacheable
             return -1;
         }
 
-        String leaderboardPositionQuery = "SELECT 1 FROM time"
-                + " WHERE courseId=" + courseId + " AND time < " + time;
+        String leaderboardPositionQuery = "SELECT 1 FROM time WHERE courseId=" + courseId + " AND time < " + time;
 
         if (player != null) {
             leaderboardPositionQuery += " AND playerId='" + getPlayerId(player) + "';";
@@ -283,8 +282,8 @@ public class ParkourDatabase extends AbstractPluginReceiver implements Cacheable
             return;
         }
 
-        String insertTimeUpdate = "INSERT INTO time (courseId, playerId, playerName, time, deaths) "
-                + "VALUES (" + courseId + ", '" + getPlayerId(player) + "', '"
+        String insertTimeUpdate = "INSERT INTO time (courseId, playerId, playerName, time, deaths) VALUES ("
+                + courseId + ", '" + getPlayerId(player) + "', '"
                 + player.getName() + "', " + time + ", " + deaths + ");";
         PluginUtils.debug("Inserting time: " + insertTimeUpdate);
 
@@ -371,8 +370,8 @@ public class ParkourDatabase extends AbstractPluginReceiver implements Cacheable
 
         PluginUtils.debug("Deleting all times for player " + player.getName() + " for course " + courseName);
         try {
-            database.updateAsync("DELETE FROM time"
-                    + " WHERE playerId='" + getPlayerId(player) + "' AND courseId=" + courseId).get();
+            database.updateAsync("DELETE FROM time WHERE playerId='" + getPlayerId(player)
+                    + "' AND courseId=" + courseId).get();
             resultsCache.remove(courseName.toLowerCase());
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
@@ -427,9 +426,11 @@ public class ParkourDatabase extends AbstractPluginReceiver implements Cacheable
      * This is required when the database becomes out of sync through manual editing.
      * Times cannot be stored until the course exists in the database.
      */
-    public void recreateAllCourses() {
+    public void recreateAllCourses(boolean displayMessage) {
         Bukkit.getScheduler().runTaskAsynchronously(parkour, () -> {
-            PluginUtils.log("Starting recreation of courses process...");
+            if (displayMessage) {
+                PluginUtils.log("Starting recreation of courses process...");
+            }
             int changes = 0;
             for (String courseName : CourseInfo.getAllCourseNames()) {
                 if (getCourseId(courseName, false) == -1) {
@@ -437,7 +438,9 @@ public class ParkourDatabase extends AbstractPluginReceiver implements Cacheable
                     changes++;
                 }
             }
-            PluginUtils.log("Process complete. Courses recreated: " + changes);
+            if (displayMessage) {
+                PluginUtils.log("Process complete. Courses recreated: " + changes);
+            }
             if (changes > 0) {
                 PluginUtils.logToFile("Courses recreated: " + changes);
             }
@@ -484,8 +487,8 @@ public class ParkourDatabase extends AbstractPluginReceiver implements Cacheable
         }
 
         String heading = TranslationUtils.getTranslation("Parkour.LeaderboardHeading", false)
-                .replace(Constants.COURSE_PLACEHOLDER, courseName)
-                .replace("%AMOUNT%", String.valueOf(times.size()));
+                .replace(ParkourConstants.COURSE_PLACEHOLDER, courseName)
+                .replace(ParkourConstants.AMOUNT_PLACEHOLDER, String.valueOf(times.size()));
 
         TranslationUtils.sendHeading(heading, sender);
 
@@ -493,9 +496,9 @@ public class ParkourDatabase extends AbstractPluginReceiver implements Cacheable
             TimeEntry entry = times.get(i);
             String translation = TranslationUtils.getTranslation("Parkour.LeaderboardEntry", false)
                     .replace("%POSITION%", String.valueOf(i + 1))
-                    .replace(Constants.PLAYER_PLACEHOLDER, entry.getPlayerName())
-                    .replace(Constants.TIME_PLACEHOLDER, DateTimeUtils.displayCurrentTime(entry.getTime()))
-                    .replace(Constants.DEATHS_PLACEHOLDER, String.valueOf(entry.getDeaths()));
+                    .replace(ParkourConstants.PLAYER_PLACEHOLDER, entry.getPlayerName())
+                    .replace(ParkourConstants.TIME_PLACEHOLDER, DateTimeUtils.displayCurrentTime(entry.getTime()))
+                    .replace(ParkourConstants.DEATHS_PLACEHOLDER, String.valueOf(entry.getDeaths()));
 
             sender.sendMessage(translation);
         }

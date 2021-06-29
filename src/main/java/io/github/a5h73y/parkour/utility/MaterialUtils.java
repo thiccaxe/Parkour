@@ -27,7 +27,6 @@ import io.github.a5h73y.parkour.Parkour;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -150,7 +149,7 @@ public class MaterialUtils {
 		ItemStack data = null;
 
 		if (args.length > 1) {
-			material = Material.getMaterial(args[1]);
+			material = Material.getMaterial(args[1].toUpperCase());
 
 		} else {
 			data = getItemStackInPlayersHand(player);
@@ -174,9 +173,6 @@ public class MaterialUtils {
 	 * @return block is valid
 	 */
 	public static boolean isCheckpointSafe(Player player, Block block) {
-		List<Material> validMaterials = getValidCheckpointMaterials();
-		Block blockUnder = block.getRelative(BlockFace.DOWN);
-
 		//check if player is standing in a half-block
 		if (!block.getType().equals(Material.AIR) && !block.getType().equals(CAVE_AIR.parseMaterial())
 				&& !block.getType().equals(lookupMaterial(
@@ -184,6 +180,9 @@ public class MaterialUtils {
 			TranslationUtils.sendMessage(player, "Invalid Material for Checkpoint: &b" + block.getType());
 			return false;
 		}
+
+		List<Material> validMaterials = getValidCheckpointMaterials();
+		Block blockUnder = block.getRelative(BlockFace.DOWN);
 
 		if (!blockUnder.getType().isOccluding()) {
 			if (blockUnder.getState().getData() instanceof Stairs) {

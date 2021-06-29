@@ -1,6 +1,5 @@
 package io.github.a5h73y.parkour;
 
-import com.g00fy2.versioncompare.Version;
 import com.google.gson.GsonBuilder;
 import io.github.a5h73y.parkour.commands.ParkourAutoTabCompleter;
 import io.github.a5h73y.parkour.commands.ParkourCommands;
@@ -24,9 +23,9 @@ import io.github.a5h73y.parkour.other.Backup;
 import io.github.a5h73y.parkour.other.CommandUsage;
 import io.github.a5h73y.parkour.other.ParkourUpdater;
 import io.github.a5h73y.parkour.plugin.AacApi;
-import io.github.a5h73y.parkour.plugin.BountifulApi;
 import io.github.a5h73y.parkour.plugin.EconomyApi;
 import io.github.a5h73y.parkour.plugin.PlaceholderApi;
+import io.github.a5h73y.parkour.plugin.TitleUtils;
 import io.github.a5h73y.parkour.type.challenge.ChallengeManager;
 import io.github.a5h73y.parkour.type.checkpoint.CheckpointManager;
 import io.github.a5h73y.parkour.type.course.CourseInfo;
@@ -37,16 +36,19 @@ import io.github.a5h73y.parkour.type.player.PlayerManager;
 import io.github.a5h73y.parkour.upgrade.ParkourUpgrader;
 import io.github.a5h73y.parkour.utility.PluginUtils;
 import io.github.a5h73y.parkour.utility.TranslationUtils;
+import io.github.g00fy2.versioncompare.Version;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import org.bstats.bukkit.Metrics;
+import org.bstats.charts.SimplePie;
+import org.bstats.charts.SingleLineChart;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 
 public class Parkour extends JavaPlugin {
 
@@ -56,7 +58,7 @@ public class Parkour extends JavaPlugin {
     private static final int SPIGOT_PLUGIN_ID = 23685;
     private static Parkour instance;
 
-    private BountifulApi bountifulApi;
+    private TitleUtils titleUtils;
     private EconomyApi economyApi;
     private PlaceholderApi placeholderApi;
 
@@ -129,6 +131,7 @@ public class Parkour extends JavaPlugin {
      * @return default config
      */
     @Override
+    @NotNull
     public DefaultConfig getConfig() {
         return (DefaultConfig) this.configManager.get(ConfigType.DEFAULT);
     }
@@ -218,8 +221,8 @@ public class Parkour extends JavaPlugin {
         return soundsManager;
     }
 
-    public BountifulApi getBountifulApi() {
-        return bountifulApi;
+    public TitleUtils getBountifulApi() {
+        return titleUtils;
     }
 
     public EconomyApi getEconomyApi() {
@@ -240,7 +243,7 @@ public class Parkour extends JavaPlugin {
     }
 
     private void setupPlugins() {
-        bountifulApi = new BountifulApi();
+        titleUtils = new TitleUtils();
         economyApi = new EconomyApi();
         placeholderApi = new PlaceholderApi();
         new AacApi();
@@ -258,7 +261,7 @@ public class Parkour extends JavaPlugin {
         playerManager = new PlayerManager(this);
         guiManager = new ParkourGuiManager(this);
         soundsManager = new SoundsManager(this);
-        database.recreateAllCourses();
+        database.recreateAllCourses(false);
     }
 
     private void registerCommands() {
@@ -306,12 +309,9 @@ public class Parkour extends JavaPlugin {
     }
 
     private void upgradeParkour() {
-        CompletableFuture.supplyAsync(() -> new ParkourUpgrader(this).getAsBoolean())
-                .thenAccept(success -> {
-                    if (success) {
-                        onEnable();
-                    }
-                });
+        if (new ParkourUpgrader(this).beginUpgrade()) {
+            onEnable();
+        }
     }
 
     /**
@@ -320,9 +320,9 @@ public class Parkour extends JavaPlugin {
      */
     private void submitAnalytics() {
         Metrics metrics = new Metrics(this, BSTATS_ID);
-        metrics.addCustomChart(new Metrics.SimplePie("number_of_courses", () ->
-                Integer.toString(CourseInfo.getAllCourseNames().size())));
-        metrics.addCustomChart(new Metrics.SingleLineChart("parkour_players", () ->
+        metrics.addCustomChart(new SimplePie("number_of_courses", () ->
+                String.valueOf(CourseInfo.getAllCourseNames().size())));
+        metrics.addCustomChart(new SingleLineChart("parkour_players", () ->
                 getPlayerManager().getNumberOfParkourPlayer()));
     }
 }

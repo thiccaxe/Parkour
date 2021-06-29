@@ -1,7 +1,10 @@
 package io.github.a5h73y.parkour;
 
+import static io.github.a5h73y.parkour.other.ParkourConstants.DEATHS_PLACEHOLDER;
+import static io.github.a5h73y.parkour.other.ParkourConstants.PLAYER_PLACEHOLDER;
+import static io.github.a5h73y.parkour.other.ParkourConstants.TIME_PLACEHOLDER;
+
 import io.github.a5h73y.parkour.database.TimeEntry;
-import io.github.a5h73y.parkour.other.Constants;
 import io.github.a5h73y.parkour.type.course.CourseInfo;
 import io.github.a5h73y.parkour.type.player.ParkourSession;
 import io.github.a5h73y.parkour.type.player.PlayerInfo;
@@ -42,7 +45,7 @@ public class ParkourPlaceholders extends PlaceholderExpansion {
     @NotNull
     @Override
     public String getIdentifier() {
-        return parkour.getName().toLowerCase();
+        return Parkour.PLUGIN_NAME;
     }
 
     @NotNull
@@ -141,7 +144,7 @@ public class ParkourPlaceholders extends PlaceholderExpansion {
                 return String.valueOf(PlayerInfo.getParkourLevel(offlinePlayer));
 
             case "rank":
-                return String.valueOf(PlayerInfo.getParkourRank(offlinePlayer));
+                return PlayerInfo.getParkourRank(offlinePlayer);
 
             case "parkoins":
                 return String.valueOf(PlayerInfo.getParkoins(offlinePlayer));
@@ -168,6 +171,14 @@ public class ParkourPlaceholders extends PlaceholderExpansion {
 
                     default:
                         return INVALID_SYNTAX;
+                }
+
+            case "course":
+                if (arguments.length == 4 && arguments[2].equals("completed")) {
+                    return getOrRetrieveCache(offlinePlayer.getName() + arguments[2] + arguments[3],
+                            () -> getCompletedMessage(offlinePlayer, arguments[3]));
+                } else {
+                    return INVALID_SYNTAX;
                 }
 
             case "prize":
@@ -197,34 +208,61 @@ public class ParkourPlaceholders extends PlaceholderExpansion {
 
     private String getCoursePlaceholderValue(OfflinePlayer offlinePlayer, String... arguments) {
         switch (arguments[1]) {
+            case "displayname":
+                if (arguments.length != 3) {
+                    return INVALID_SYNTAX;
+                }
+
+                return CourseInfo.getCourseDisplayName(arguments[2]);
+
             case "record":
                 if (arguments.length != 4) {
                     return INVALID_SYNTAX;
                 }
 
-                return getCourseRecord(arguments[3], arguments[2]);
-
-            case "completed":
-                if (arguments.length != 3) {
-                    return INVALID_SYNTAX;
-                }
-
-                return getOrRetrieveCache(offlinePlayer.getName() + arguments[1] + arguments[2],
-                        () -> getCompletedMessage(offlinePlayer, arguments[2]));
+                return getCourseRecord(arguments[2], arguments[3]);
 
             case "completions":
                 if (arguments.length != 3) {
                     return INVALID_SYNTAX;
                 }
 
-                return Integer.toString(CourseInfo.getCompletions(arguments[2]));
+                return String.valueOf(CourseInfo.getCompletions(arguments[2]));
 
             case "views":
                 if (arguments.length != 3) {
                     return INVALID_SYNTAX;
                 }
 
-                return Integer.toString(CourseInfo.getViews(arguments[2]));
+                return String.valueOf(CourseInfo.getViews(arguments[2]));
+
+            case "joinfee":
+                if (arguments.length != 3) {
+                    return INVALID_SYNTAX;
+                }
+
+                return String.valueOf(CourseInfo.getEconomyJoiningFee(arguments[2]));
+
+            case "ecoreward":
+                if (arguments.length != 3) {
+                    return INVALID_SYNTAX;
+                }
+
+                return String.valueOf(CourseInfo.getEconomyFinishReward(arguments[2]));
+
+            case "players":
+                if (arguments.length != 3) {
+                    return INVALID_SYNTAX;
+                }
+
+                return String.valueOf(parkour.getPlayerManager().getNumberOfPlayersOnCourse(arguments[2]));
+
+            case "playerlist":
+                if (arguments.length != 3) {
+                    return INVALID_SYNTAX;
+                }
+
+                return String.join(", ", parkour.getPlayerManager().getPlayerNamesOnCourse(arguments[2]));
 
             default:
                 return INVALID_SYNTAX;
@@ -252,6 +290,9 @@ public class ParkourPlaceholders extends PlaceholderExpansion {
                     case "name":
                         return session.getCourseName();
 
+                    case "displayname":
+                        return session.getCourse().getDisplayName();
+
                     case "deaths":
                         return String.valueOf(session.getDeaths());
 
@@ -277,6 +318,12 @@ public class ParkourPlaceholders extends PlaceholderExpansion {
                         }
                         return getPersonalCourseRecord(player, session.getCourseName(), arguments[4]);
 
+                    case "remaining":
+                        if (arguments.length != 4 && !arguments[3].equals("deaths")) {
+                            return INVALID_SYNTAX;
+                        }
+                        return String.valueOf(session.getRemainingDeaths());
+
                     default:
                         return INVALID_SYNTAX;
                 }
@@ -301,9 +348,10 @@ public class ParkourPlaceholders extends PlaceholderExpansion {
             return NO_TIME_RECORDED;
 
         } else {
-            return TOP_TEN_RESULT.replace(Constants.PLAYER_PLACEHOLDER, result.getPlayerName())
-                    .replace("%POSITION%", Integer.toString(position))
-                    .replace("%TIME%", DateTimeUtils.displayCurrentTime(result.getTime()));
+            return TOP_TEN_RESULT.replace(PLAYER_PLACEHOLDER, result.getPlayerName())
+                    .replace("%POSITION%", String.valueOf(position))
+                    .replace(TIME_PLACEHOLDER, DateTimeUtils.displayCurrentTime(result.getTime()))
+                    .replace(DEATHS_PLACEHOLDER, String.valueOf(result.getDeaths()));
         }
     }
 
@@ -340,6 +388,9 @@ public class ParkourPlaceholders extends PlaceholderExpansion {
             switch (key) {
                 case "time":
                     return DateTimeUtils.displayCurrentTime(result.getTime());
+
+                case "milliseconds":
+                    return String.valueOf(result.getTime());
 
                 case "deaths":
                     return String.valueOf(result.getDeaths());

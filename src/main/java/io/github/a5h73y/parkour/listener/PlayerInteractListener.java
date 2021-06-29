@@ -3,11 +3,14 @@ package io.github.a5h73y.parkour.listener;
 import com.cryptomorin.xseries.XBlock;
 import com.cryptomorin.xseries.XMaterial;
 import io.github.a5h73y.parkour.Parkour;
+import io.github.a5h73y.parkour.enums.ParkourEventType;
 import io.github.a5h73y.parkour.enums.ParkourMode;
+import io.github.a5h73y.parkour.enums.SoundType;
 import io.github.a5h73y.parkour.other.AbstractPluginReceiver;
 import io.github.a5h73y.parkour.type.checkpoint.Checkpoint;
 import io.github.a5h73y.parkour.type.player.ParkourSession;
 import io.github.a5h73y.parkour.utility.MaterialUtils;
+import io.github.a5h73y.parkour.utility.PlayerUtils;
 import io.github.a5h73y.parkour.utility.PluginUtils;
 import io.github.a5h73y.parkour.utility.TranslationUtils;
 import org.bukkit.Bukkit;
@@ -41,16 +44,15 @@ public class PlayerInteractListener extends AbstractPluginReceiver implements Li
             return;
         }
 
-        Player player = event.getPlayer();
-
         if (!event.getAction().equals(Action.RIGHT_CLICK_BLOCK) && !event.getAction().equals(Action.RIGHT_CLICK_AIR)) {
             return;
         }
 
-        if (PluginUtils.getMinorServerVersion() > 8 && !event.getHand().equals(EquipmentSlot.HAND)) {
+        if (PluginUtils.getMinorServerVersion() > 8 && !EquipmentSlot.HAND.equals(event.getHand())) {
             return;
         }
 
+        Player player = event.getPlayer();
         if (!player.isSneaking() && parkour.getConfig().getBoolean("OnCourse.SneakToInteractItems")) {
             return;
         }
@@ -71,26 +73,31 @@ public class PlayerInteractListener extends AbstractPluginReceiver implements Li
         }
 
         if (materialInHand == parkour.getConfig().getLastCheckpointTool()) {
-            if (parkour.getPlayerManager().delayPlayer(player, 1, false)) {
+            if (parkour.getPlayerManager().delayPlayer(player, 1)) {
                 event.setCancelled(true);
                 Bukkit.getScheduler().runTask(parkour, () -> parkour.getPlayerManager().playerDie(player));
             }
 
         } else if (materialInHand == parkour.getConfig().getHideAllDisabledTool()
                 || materialInHand == parkour.getConfig().getHideAllEnabledTool()) {
-            if (parkour.getPlayerManager().delayPlayer(player, 1, false)) {
+            if (parkour.getPlayerManager().delayPlayer(player, 1)) {
                 event.setCancelled(true);
                 parkour.getPlayerManager().toggleVisibility(player);
+                player.getInventory().remove(materialInHand);
+                String configPath = parkour.getPlayerManager().hasHiddenPlayers(player)
+                        ? "ParkourTool.HideAllEnabled" : "ParkourTool.HideAll";
+                parkour.getPlayerManager().giveParkourTool(player, configPath, configPath);
             }
 
         } else if (materialInHand == parkour.getConfig().getLeaveTool()) {
-            if (parkour.getPlayerManager().delayPlayer(player, 1, false)) {
+            if (parkour.getPlayerManager().delayPlayer(player, 1)) {
                 event.setCancelled(true);
                 parkour.getPlayerManager().leaveCourse(player);
             }
 
         } else if (materialInHand == parkour.getConfig().getRestartTool()) {
-            if (parkour.getPlayerManager().delayPlayer(player, 1, false)) {
+            if (parkour.getPlayerManager().delayPlayer(player,
+                    parkour.getConfig().getInt("ParkourTool.Restart.SecondCooldown"))) {
                 event.setCancelled(true);
                 Bukkit.getScheduler().runTask(parkour, () -> parkour.getPlayerManager().restartCourse(player));
             }
@@ -136,7 +143,8 @@ public class PlayerInteractListener extends AbstractPluginReceiver implements Li
                 TranslationUtils.sendTranslation("Mode.Freedom.Save", player);
 
             } else {
-                player.teleport(parkour.getPlayerManager().getParkourSession(player).getFreedomLocation());
+                PlayerUtils.teleportToLocation(player,
+                        parkour.getPlayerManager().getParkourSession(player).getFreedomLocation());
                 TranslationUtils.sendTranslation("Mode.Freedom.Load", player);
             }
 
@@ -144,7 +152,7 @@ public class PlayerInteractListener extends AbstractPluginReceiver implements Li
                 && MaterialUtils.getMaterialInPlayersHand(player) == XMaterial.FIREWORK_ROCKET.parseMaterial()) {
 
             int secondDelay = parkour.getConfig().getInt("ParkourModes.Rockets.Delay");
-            if (parkour.getPlayerManager().delayPlayer(player, secondDelay, true, false)) {
+            if (parkour.getPlayerManager().delayPlayer(player, secondDelay, "Mode.Rockets.Reloading", false)) {
                 parkour.getPlayerManager().rocketLaunchPlayer(player);
             }
         }
@@ -174,11 +182,24 @@ public class PlayerInteractListener extends AbstractPluginReceiver implements Li
         ParkourSession session = parkour.getPlayerManager().getParkourSession(event.getPlayer());
 
         if (session.getParkourMode() == ParkourMode.FREE_CHECKPOINT
-                && parkour.getPlayerManager().delayPlayer(event.getPlayer(), 1, false, false)
+                && parkour.getPlayerManager().delayPlayer(event.getPlayer(), 1)
                 && (session.getFreedomLocation() == null
                 || !MaterialUtils.sameBlockLocations(event.getPlayer().getLocation(), session.getFreedomLocation()))) {
+
             session.setFreedomLocation(event.getPlayer().getLocation());
-            TranslationUtils.sendTranslation("Event.FreeCheckpoints", event.getPlayer());
+            if (parkour.getConfig().isTreatFirstCheckpointAsStart() && session.getFreedomLocation() == null) {
+                session.resetTime();
+                session.setStartTimer(true);
+                parkour.getBountifulApi().sendActionBar(event.getPlayer(),
+                        TranslationUtils.getTranslation("Parkour.TimerStarted", false), true);
+            }
+            parkour.getSoundsManager().playSound(event.getPlayer(), SoundType.CHECKPOINT_ACHIEVED);
+            boolean showTitle = parkour.getConfig().getBoolean("DisplayTitle.Checkpoint");
+
+            String checkpointMessage = TranslationUtils.getCourseEventMessage(session,
+                    ParkourEventType.CHECKPOINT, "Event.FreeCheckpoints");
+
+            parkour.getBountifulApi().sendSubTitle(event.getPlayer(), checkpointMessage, showTitle);
             return;
         }
 
@@ -225,8 +246,12 @@ public class PlayerInteractListener extends AbstractPluginReceiver implements Li
             return;
         }
 
+        if (parkour.getConfig().getBoolean("OnCourse.PreventPlateStick")) {
+            event.setCancelled(true);
+        }
+
         // Prevent a user spamming the joins
-        if (!parkour.getPlayerManager().delayPlayer(event.getPlayer(), 1, false)) {
+        if (!parkour.getPlayerManager().delayPlayer(event.getPlayer(), 1)) {
             return;
         }
 
@@ -237,8 +262,10 @@ public class PlayerInteractListener extends AbstractPluginReceiver implements Li
             if (session != null) {
                 // we only want to do something if the names match
                 if (session.getCourseName().equals(courseName)) {
-                    Bukkit.getScheduler().runTask(parkour, () ->
-                            parkour.getPlayerManager().restartCourse(event.getPlayer(), true));
+                    Bukkit.getScheduler().runTask(parkour, () -> {
+                        session.resetProgress();
+                        session.setFreedomLocation(null);
+                    });
                 }
             } else {
                 parkour.getPlayerManager().joinCourseButDelayed(

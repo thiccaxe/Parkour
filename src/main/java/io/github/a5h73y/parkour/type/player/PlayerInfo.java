@@ -14,6 +14,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Player Information Utility class.
@@ -308,7 +309,7 @@ public class PlayerInfo {
     public static int getSavedFoodLevel(Player player) {
         return Parkour.getConfig(ConfigType.INVENTORY).getInt(player.getUniqueId() + ".Hunger");
     }
-    
+
     /**
      * Save the Player's Health and Food Level.
      * @param player player
@@ -368,7 +369,7 @@ public class PlayerInfo {
     public static ItemStack[] getSavedInventoryContents(Player player) {
         List<ItemStack> contents = (List<ItemStack>) Parkour.getConfig(ConfigType.INVENTORY)
                 .getList(player.getUniqueId() + ".Inventory");
-        return contents != null ? contents.toArray(new ItemStack[contents.size()]) : null;
+        return contents != null ? contents.toArray(new ItemStack[0]) : null;
     }
 
     /**
@@ -379,7 +380,7 @@ public class PlayerInfo {
     public static ItemStack[] getSavedArmorContents(Player player) {
         List<ItemStack> contents = (List<ItemStack>) Parkour.getConfig(ConfigType.INVENTORY)
                 .getList(player.getUniqueId() + ".Armor");
-        return contents != null ? contents.toArray(new ItemStack[contents.size()]) : null;
+        return contents != null ? contents.toArray(new ItemStack[0]) : null;
     }
 
     /**
@@ -441,10 +442,10 @@ public class PlayerInfo {
     /**
      * Set the Player's Quiet Mode status.
      * @param player target player
-     * @param inQuietMode value to set
+     * @param quietMode value to set
      */
-    public static void setQuietMode(Player player, boolean inQuietMode) {
-        getPlayersConfig().set(player.getUniqueId() + ".QuietMode", inQuietMode);
+    public static void setQuietMode(Player player, boolean quietMode) {
+        getPlayersConfig().set(player.getUniqueId() + ".QuietMode", quietMode);
         persistChanges();
     }
 
@@ -477,6 +478,36 @@ public class PlayerInfo {
     }
 
     /**
+     * Get the existing Session Course name.
+     * The name of the Course they were on when leaving the server.
+     * @param player player
+     * @return session course name
+     */
+    @Nullable
+    public static String getExistingSessionCourseName(Player player) {
+        return getPlayersConfig().getString(player.getUniqueId() + ".ExistingSessionCourseName");
+    }
+
+    /**
+     * Player has existing Session Course name.
+     * @param player player
+     * @return player has existing session course name
+     */
+    public static boolean hasExistingSessionCourseName(Player player) {
+        return getPlayersConfig().contains(player.getUniqueId() + ".ExistingSessionCourseName");
+    }
+
+    /**
+     * Set the existing Session Course name.
+     * @param player player
+     * @param courseName course name
+     */
+    public static void setExistingSessionCourseName(Player player, String courseName) {
+        getPlayersConfig().set(player.getUniqueId() + ".ExistingSessionCourseName", courseName);
+        persistChanges();
+    }
+
+    /**
      * Get the Players {@link ParkourConfiguration}.
      * @return the players.yml configuration
      */
@@ -491,4 +522,7 @@ public class PlayerInfo {
         getPlayersConfig().save();
     }
 
+    private PlayerInfo() {
+        throw new IllegalStateException("Utility class");
+    }
 }
